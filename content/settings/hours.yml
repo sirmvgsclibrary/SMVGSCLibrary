@@ -1,0 +1,7 @@
+weekday:
+  days: "Monday - Friday"
+  hours: "8:00 AM - 8:00 PM"
+saturday:
+  hours: "9:00 AM - 5:00 PM"
+sunday:
+  status: "Closed"

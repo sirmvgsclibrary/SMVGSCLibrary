@@ -1,0 +1,173 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+collections:
+  # Books Collection
+  - name: "books"
+    label: "Books"
+    folder: "content/books"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Author", name: "author", widget: "string" }
+      - { label: "ISBN", name: "isbn", widget: "string" }
+      - { label: "Department", name: "department", widget: "select", options: ["BCA", "Chemistry", "Mathematics", "Physics", "Botany", "Zoology"] }
+      - { label: "Available", name: "available", widget: "boolean", default: true }
+      - { label: "Location", name: "location", widget: "string" }
+      - { label: "Cover Image", name: "cover", widget: "image", required: false }
+      - { label: "Description", name: "description", widget: "text", required: false }
+
+  # Staff Collection
+  - name: "staff"
+    label: "Staff Members"
+    folder: "content/staff"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Name", name: "name", widget: "string" }
+      - { label: "Position", name: "position", widget: "string" }
+      - { label: "Department", name: "department", widget: "string" }
+      - { label: "Email", name: "email", widget: "string" }
+      - { label: "Phone", name: "phone", widget: "string" }
+      - { label: "Photo", name: "photo", widget: "image", required: false }
+      - { label: "Bio", name: "bio", widget: "text", required: false }
+
+  # Question Papers Collection
+  - name: "question-papers"
+    label: "Question Papers"
+    folder: "content/question-papers"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Department", name: "department", widget: "select", options: ["BCA", "Chemistry", "Mathematics", "Physics", "Botany", "Zoology"] }
+      - { label: "Semester", name: "semester", widget: "string" }
+      - { label: "Year", name: "year", widget: "string" }
+      - { label: "Type", name: "type", widget: "select", options: ["Mid Semester", "End Semester", "Internal Assessment"] }
+      - { label: "PDF File", name: "file", widget: "file" }
+
+  # E-Resources Collection
+  - name: "e-resources"
+    label: "E-Resources"
+    folder: "content/e-resources"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "Category", name: "category", widget: "string" }
+      - { label: "URL", name: "url", widget: "string" }
+      - { label: "Icon", name: "icon", widget: "select", options: ["FileText", "Database", "Book", "Globe"] }
+      - { label: "Thumbnail", name: "thumbnail", widget: "image", required: false }
+
+  # Announcements Collection
+  - name: "announcements"
+    label: "Announcements"
+    folder: "content/announcements"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Publish Date", name: "date", widget: "datetime" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "Priority", name: "priority", widget: "select", options: ["high", "medium", "low"], default: "medium" }
+      - { label: "Image", name: "image", widget: "image", required: false }
+
+  # Pages Collection
+  - name: "pages"
+    label: "Pages"
+    files:
+      # About College
+      - label: "About College"
+        name: "about-college"
+        file: "content/pages/about-college.md"
+        fields:
+          - { label: "Title", name: "title", widget: "string", default: "About the College" }
+          - { label: "Content", name: "body", widget: "markdown" }
+          - { label: "Image", name: "image", widget: "image" }
+
+      # About Library
+      - label: "About Library"
+        name: "about-library"
+        file: "content/pages/about-library.md"
+        fields:
+          - { label: "Title", name: "title", widget: "string", default: "About the Library" }
+          - { label: "Content", name: "body", widget: "markdown" }
+          - { label: "Image", name: "image", widget: "image" }
+          - label: "Statistics"
+            name: "statistics"
+            widget: "object"
+            fields:
+              - { label: "Books Count", name: "books", widget: "string" }
+              - { label: "Journals Count", name: "journals", widget: "string" }
+              - { label: "Seats", name: "seats", widget: "string" }
+              - { label: "Digital Access", name: "digital", widget: "string" }
+
+      # About Website
+      - label: "About Website"
+        name: "about-website"
+        file: "content/pages/about-website.md"
+        fields:
+          - { label: "Title", name: "title", widget: "string", default: "About the Website" }
+          - { label: "Description", name: "description", widget: "text" }
+          - label: "Supervisors"
+            name: "supervisors"
+            widget: "list"
+            fields:
+              - { label: "Name", name: "name", widget: "string" }
+              - { label: "Role", name: "role", widget: "string" }
+          - label: "Development Team"
+            name: "team"
+            widget: "object"
+            fields:
+              - { label: "Team Name", name: "name", widget: "string", default: "The Coders Club" }
+              - { label: "Website URL", name: "url", widget: "string", default: "https://codersclub.netlify.app" }
+
+  # Settings
+  - name: "settings"
+    label: "Site Settings"
+    files:
+      - label: "Contact Information"
+        name: "contact"
+        file: "content/settings/contact.yml"
+        fields:
+          - { label: "Address", name: "address", widget: "text" }
+          - { label: "Phone", name: "phone", widget: "string" }
+          - { label: "Library Phone", name: "libraryPhone", widget: "string" }
+          - { label: "Email", name: "email", widget: "string" }
+          - { label: "Library Email", name: "libraryEmail", widget: "string" }
+
+      - label: "Library Hours"
+        name: "hours"
+        file: "content/settings/hours.yml"
+        fields:
+          - label: "Weekday Hours"
+            name: "weekday"
+            widget: "object"
+            fields:
+              - { label: "Days", name: "days", widget: "string", default: "Monday - Friday" }
+              - { label: "Hours", name: "hours", widget: "string" }
+          - label: "Saturday Hours"
+            name: "saturday"
+            widget: "object"
+            fields:
+              - { label: "Hours", name: "hours", widget: "string" }
+          - label: "Sunday"
+            name: "sunday"
+            widget: "object"
+            fields:
+              - { label: "Status", name: "status", widget: "string", default: "Closed" }
+
+      - label: "Hero Section"
+        name: "hero"
+        file: "content/settings/hero.yml"
+        fields:
+          - { label: "Heading", name: "heading", widget: "string" }
+          - { label: "Subheading", name: "subheading", widget: "text" }
+          - { label: "Hero Image", name: "image", widget: "image" }
+          - { label: "Background Image", name: "backgroundImage", widget: "image" }

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MVGSC Library - Sir MV Government Science College</title>
+    <meta name="description" content="Official library website of Sir M. Visvesvaraya Government Science College. Access OPAC search, e-resources, question papers, and more." />
+    <meta name="author" content="The Coders Club" />
+    <link rel="canonical" href="https://mvgsc-library.netlify.app/" />
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="MVGSC Library - Sir MV Government Science College" />
+    <meta property="og:description" content="Your gateway to knowledge, research, and academic excellence. Access comprehensive library resources online." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://mvgsc-library.netlify.app/" />
+    <meta property="og:image" content="https://mvgsc-library.netlify.app/uploads/og-image.jpg" />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MVGSC Library - Sir MV Government Science College" />
+    <meta name="twitter:description" content="Access comprehensive library resources, OPAC search, e-journals, and question papers." />
+    <meta name="twitter:image" content="https://mvgsc-library.netlify.app/uploads/og-image.jpg" />
+
+    <!-- Decap CMS Identity -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", user => {
+          if (!user) {
+            window.netlifyIdentity.on("login", () => {
+              document.location.href = "/admin/";
+            });
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
