@@ -1,0 +1,8 @@
+{
+  "title": "google gemini",
+  "description": "AI tools",
+  "category": "AI tools for research",
+  "icon": "FileText",
+  "url": "https://gemini.google.com/app",
+  "thumbnail": "/uploads/flutter.png"
+}
