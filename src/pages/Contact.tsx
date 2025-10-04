@@ -5,8 +5,99 @@ import { Textarea } from "@/components/ui/textarea";
 import GlassCard from "@/components/GlassCard";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import { useEffect, useState } from "react";
+
+interface ContactData {
+  address: string;
+  phone: string;
+  libraryPhone: string;
+  email: string;
+  libraryEmail: string;
+}
+
+interface HoursData {
+  weekday: {
+    days: string;
+    hours: string;
+  };
+  saturday: {
+    hours: string;
+  };
+  sunday: {
+    status: string;
+  };
+}
 
 const Contact = () => {
+  const [contactInfo, setContactInfo] = useState<ContactData | null>(null);
+  const [libraryHours, setLibraryHours] = useState<HoursData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadContactData = async () => {
+      try {
+        setLoading(true);
+        
+        // Load contact information
+        try {
+          const contactModule = await import('../../content/settings/contact.json');
+          setContactInfo(contactModule.default);
+        } catch (err) {
+          console.log('Contact settings not found, using fallback');
+        }
+
+        // Load library hours
+        try {
+          const hoursModule = await import('../../content/settings/hours.json');
+          setLibraryHours(hoursModule.default);
+        } catch (err) {
+          console.log('Library hours settings not found, using fallback');
+        }
+
+      } catch (err) {
+        console.error('Error loading contact data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadContactData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            {/* Loading skeleton */}
+            <div className="text-center mb-12">
+              <div className="inline-flex p-4 rounded-2xl bg-gray-300 mb-6 animate-pulse">
+                <Mail className="h-12 w-12 text-gray-400" />
+              </div>
+              <div className="h-10 bg-gray-300 rounded w-64 mx-auto mb-4 animate-pulse"></div>
+              <div className="h-4 bg-gray-300 rounded w-96 mx-auto animate-pulse"></div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="p-6 rounded-2xl bg-gray-300 animate-pulse">
+                  <div className="w-16 h-16 rounded-xl bg-gray-400 mx-auto mb-4"></div>
+                  <div className="h-6 bg-gray-400 rounded w-3/4 mx-auto mb-2"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-400 rounded"></div>
+                    <div className="h-4 bg-gray-400 rounded w-5/6 mx-auto"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -25,7 +116,7 @@ const Contact = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-            {/* Contact Information Cards */}
+            {/* Address Card */}
             <GlassCard hover className="animate-fade-in-up">
               <div className="text-center space-y-4">
                 <div className="inline-flex p-4 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 mb-2">
@@ -33,13 +124,18 @@ const Contact = () => {
                 </div>
                 <h3 className="text-xl font-semibold">Visit Us</h3>
                 <p className="text-muted-foreground">
-                  Sir M. Visvesvaraya Government Science College<br />
-                  Library Building<br />
-                  [City, State - Pincode]
+                  {contactInfo?.address || (
+                    <>
+                      Sir M. Visvesvaraya Government Science College<br />
+                      Library Building<br />
+                      [City, State - Pincode]
+                    </>
+                  )}
                 </p>
               </div>
             </GlassCard>
 
+            {/* Phone Card */}
             <GlassCard hover className="animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
               <div className="text-center space-y-4">
                 <div className="inline-flex p-4 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 mb-2">
@@ -47,13 +143,24 @@ const Contact = () => {
                 </div>
                 <h3 className="text-xl font-semibold">Call Us</h3>
                 <p className="text-muted-foreground">
-                  Main: +91-XXX-XXX-XXXX<br />
-                  Library: +91-XXX-XXX-YYYY<br />
-                  Mon - Fri: 8 AM - 6 PM
+                  {contactInfo?.phone ? (
+                    <>
+                      Main: {contactInfo.phone}<br />
+                      {contactInfo.libraryPhone && `Library: ${contactInfo.libraryPhone}`}<br />
+                      Mon - Fri: 8 AM - 6 PM
+                    </>
+                  ) : (
+                    <>
+                      Main: +91-XXX-XXX-XXXX<br />
+                      Library: +91-XXX-XXX-YYYY<br />
+                      Mon - Fri: 8 AM - 6 PM
+                    </>
+                  )}
                 </p>
               </div>
             </GlassCard>
 
+            {/* Email Card */}
             <GlassCard hover className="animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
               <div className="text-center space-y-4">
                 <div className="inline-flex p-4 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 mb-2">
@@ -61,9 +168,19 @@ const Contact = () => {
                 </div>
                 <h3 className="text-xl font-semibold">Email Us</h3>
                 <p className="text-muted-foreground">
-                  General: info@mvgsc.edu<br />
-                  Library: library@mvgsc.edu<br />
-                  We reply within 24 hours
+                  {contactInfo?.email ? (
+                    <>
+                      General: {contactInfo.email}<br />
+                      {contactInfo.libraryEmail && `Library: ${contactInfo.libraryEmail}`}<br />
+                      We reply within 24 hours
+                    </>
+                  ) : (
+                    <>
+                      General: info@mvgsc.edu<br />
+                      Library: library@mvgsc.edu<br />
+                      We reply within 24 hours
+                    </>
+                  )}
                 </p>
               </div>
             </GlassCard>
@@ -87,7 +204,7 @@ const Contact = () => {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Email</label>
-                  <Input type="email" placeholder="john.doe@example.com" />
+                    <Input type="email" placeholder="john.doe@example.com" />
                 </div>
 
                 <div className="space-y-2">
@@ -119,16 +236,24 @@ const Contact = () => {
                     <h3 className="text-xl font-semibold mb-4">Library Hours</h3>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center pb-2 border-b border-border/50">
-                        <span className="font-medium">Monday - Friday</span>
-                        <span className="text-muted-foreground">8:00 AM - 8:00 PM</span>
+                        <span className="font-medium">
+                          {libraryHours?.weekday?.days || "Monday - Friday"}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {libraryHours?.weekday?.hours || "8:00 AM - 8:00 PM"}
+                        </span>
                       </div>
                       <div className="flex justify-between items-center pb-2 border-b border-border/50">
                         <span className="font-medium">Saturday</span>
-                        <span className="text-muted-foreground">9:00 AM - 5:00 PM</span>
+                        <span className="text-muted-foreground">
+                          {libraryHours?.saturday?.hours || "9:00 AM - 5:00 PM"}
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="font-medium">Sunday</span>
-                        <span className="text-red-500 font-medium">Closed</span>
+                        <span className="text-red-500 font-medium">
+                          {libraryHours?.sunday?.status || "Closed"}
+                        </span>
                       </div>
                     </div>
                   </div>

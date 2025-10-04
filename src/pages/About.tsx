@@ -4,18 +4,107 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import collegeImage from "@/assets/college-building.jpg";
 import libraryImage from "@/assets/library-interior.jpg";
+import { useEffect, useState } from "react";
+
+interface PageData {
+  title: string;
+  body: string;
+  image: string;
+  statistics?: {
+    books: string;
+    journals: string;
+    seats: string;
+    digital: string;
+  };
+}
+
+interface AboutWebsiteData {
+  title: string;
+  description: string;
+  supervisors: Array<{
+    name: string;
+    role: string;
+  }>;
+  team: {
+    name: string;
+    url: string;
+  };
+}
 
 const About = () => {
-  const supervisors = [
-    {
-      name: "Dr. Shoaib Ahammed",
-      role: "Project Supervisor",
-    },
-    {
-      name: "Manjunath H R",
-      role: "Head of Department, BCA",
-    },
-  ];
+  const [aboutCollege, setAboutCollege] = useState<PageData | null>(null);
+  const [aboutLibrary, setAboutLibrary] = useState<PageData | null>(null);
+  const [aboutWebsite, setAboutWebsite] = useState<AboutWebsiteData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadAboutData = async () => {
+      try {
+        setLoading(true);
+        
+        // Use relative paths instead of @ alias
+        const modules = import.meta.glob('../../content/pages/*.json');
+        
+        for (const path in modules) {
+          try {
+            const module = await modules[path]() as { default: any };
+            const fileName = path.split('/').pop();
+            
+            switch (fileName) {
+              case 'about-college.json':
+                setAboutCollege(module.default);
+                break;
+              case 'about-library.json':
+                setAboutLibrary(module.default);
+                break;
+              case 'about-website.json':
+                setAboutWebsite(module.default);
+                break;
+            }
+          } catch (err) {
+            console.warn(`Failed to load ${path}:`, err);
+          }
+        }
+
+      } catch (err) {
+        console.error('Error loading about data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAboutData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            {/* Loading skeleton for About College */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+              <div className="space-y-6">
+                <div className="inline-flex p-4 rounded-2xl bg-gray-300 mb-4 animate-pulse">
+                  <Building2 className="h-10 w-10 text-gray-400" />
+                </div>
+                <div className="h-10 bg-gray-300 rounded w-3/4 animate-pulse"></div>
+                <div className="space-y-4">
+                  <div className="h-4 bg-gray-300 rounded animate-pulse"></div>
+                  <div className="h-4 bg-gray-300 rounded animate-pulse"></div>
+                  <div className="h-4 bg-gray-300 rounded w-2/3 animate-pulse"></div>
+                </div>
+              </div>
+              <div className="relative">
+                <div className="w-full h-64 bg-gray-300 rounded-2xl animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -30,34 +119,54 @@ const About = () => {
                 <div className="inline-flex p-4 rounded-2xl bg-gradient-to-br from-primary to-accent mb-4">
                   <Building2 className="h-10 w-10 text-white" />
                 </div>
-                <h2 className="text-4xl font-bold">About the College</h2>
+                <h2 className="text-4xl font-bold">
+                  {aboutCollege?.title || "About the College"}
+                </h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
-                  <p>
-                    Sir M. Visvesvaraya Government Science College stands as a testament to academic 
-                    excellence and innovation in higher education. Established with a vision to nurture 
-                    scientific temperament and foster research, our institution has been at the forefront 
-                    of quality education for decades.
-                  </p>
-                  <p>
-                    Named after the legendary engineer and statesman Sir M. Visvesvaraya, our college 
-                    embodies his principles of precision, dedication, and service to society. We offer 
-                    comprehensive programs across various scientific disciplines including Physics, Chemistry, 
-                    Mathematics, Computer Science, and Life Sciences.
-                  </p>
-                  <p>
-                    With state-of-the-art laboratories, experienced faculty, and a commitment to holistic 
-                    development, we prepare students to become leaders and innovators in their chosen fields.
-                  </p>
+                  {aboutCollege?.body ? (
+                    <div className="prose prose-lg max-w-none">
+                      {aboutCollege.body.split('\n').map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                      ))}
+                    </div>
+                  ) : (
+                    <>
+                      <p>
+                        Sir M. Visvesvaraya Government Science College stands as a testament to academic 
+                        excellence and innovation in higher education. Established with a vision to nurture 
+                        scientific temperament and foster research, our institution has been at the forefront 
+                        of quality education for decades.
+                      </p>
+                      <p>
+                        Named after the legendary engineer and statesman Sir M. Visvesvaraya, our college 
+                        embodies his principles of precision, dedication, and service to society. We offer 
+                        comprehensive programs across various scientific disciplines including Physics, Chemistry, 
+                        Mathematics, Computer Science, and Life Sciences.
+                      </p>
+                      <p>
+                        With state-of-the-art laboratories, experienced faculty, and a commitment to holistic 
+                        development, we prepare students to become leaders and innovators in their chosen fields.
+                      </p>
+                    </>
+                  )}
                 </div>
               </div>
 
               <div className="relative animate-fade-in">
                 <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl blur-2xl" />
-                <img
-                  src={collegeImage}
-                  alt="College Building"
-                  className="relative rounded-2xl shadow-2xl w-full h-auto"
-                />
+                {aboutCollege?.image ? (
+                  <img
+                    src={aboutCollege.image}
+                    alt="College Building"
+                    className="relative rounded-2xl shadow-2xl w-full h-auto"
+                  />
+                ) : (
+                  <img
+                    src={collegeImage}
+                    alt="College Building"
+                    className="relative rounded-2xl shadow-2xl w-full h-auto"
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -69,53 +178,81 @@ const About = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="order-2 lg:order-1 relative animate-fade-in">
                 <div className="absolute -inset-4 bg-gradient-to-r from-accent/20 to-primary/20 rounded-2xl blur-2xl" />
-                <img
-                  src={libraryImage}
-                  alt="Library Interior"
-                  className="relative rounded-2xl shadow-2xl w-full h-auto"
-                />
+                {aboutLibrary?.image ? (
+                  <img
+                    src={aboutLibrary.image}
+                    alt="Library Interior"
+                    className="relative rounded-2xl shadow-2xl w-full h-auto"
+                  />
+                ) : (
+                  <img
+                    src={libraryImage}
+                    alt="Library Interior"
+                    className="relative rounded-2xl shadow-2xl w-full h-auto"
+                  />
+                )}
               </div>
 
               <div className="order-1 lg:order-2 space-y-6 animate-fade-in-up">
                 <div className="inline-flex p-4 rounded-2xl bg-gradient-to-br from-primary to-accent mb-4">
                   <BookOpen className="h-10 w-10 text-white" />
                 </div>
-                <h2 className="text-4xl font-bold">About the Library</h2>
+                <h2 className="text-4xl font-bold">
+                  {aboutLibrary?.title || "About the Library"}
+                </h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
-                  <p>
-                    The MVGSC Library serves as the intellectual hub of our institution, housing an 
-                    extensive collection of over 50,000 books, journals, and digital resources. Our library 
-                    is designed to support both academic excellence and personal intellectual growth.
-                  </p>
-                  <p>
-                    With dedicated reading halls, digital resource centers, and collaborative study spaces, 
-                    we provide an environment conducive to learning and research. Our collection spans across 
-                    all scientific disciplines, complemented by access to international journals and databases.
-                  </p>
-                  <p>
-                    The library is staffed by experienced professionals who are committed to assisting students 
-                    and faculty in their academic pursuits. We continuously update our collection and services 
-                    to meet the evolving needs of our academic community.
-                  </p>
+                  {aboutLibrary?.body ? (
+                    <div className="prose prose-lg max-w-none">
+                      {aboutLibrary.body.split('\n').map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
+                      ))}
+                    </div>
+                  ) : (
+                    <>
+                      <p>
+                        The MVGSC Library serves as the intellectual hub of our institution, housing an 
+                        extensive collection of over 50,000 books, journals, and digital resources. Our library 
+                        is designed to support both academic excellence and personal intellectual growth.
+                      </p>
+                      <p>
+                        With dedicated reading halls, digital resource centers, and collaborative study spaces, 
+                        we provide an environment conducive to learning and research. Our collection spans across 
+                        all scientific disciplines, complemented by access to international journals and databases.
+                      </p>
+                      <p>
+                        The library is staffed by experienced professionals who are committed to assisting students 
+                        and faculty in their academic pursuits. We continuously update our collection and services 
+                        to meet the evolving needs of our academic community.
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 <GlassCard>
                   <h3 className="font-semibold mb-3">Library Statistics</h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <div className="text-2xl font-bold gradient-text">50,000+</div>
+                      <div className="text-2xl font-bold gradient-text">
+                        {aboutLibrary?.statistics?.books || "50,000+"}
+                      </div>
                       <div className="text-muted-foreground">Books</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold gradient-text">200+</div>
+                      <div className="text-2xl font-bold gradient-text">
+                        {aboutLibrary?.statistics?.journals || "200+"}
+                      </div>
                       <div className="text-muted-foreground">Journals</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold gradient-text">100+</div>
+                      <div className="text-2xl font-bold gradient-text">
+                        {aboutLibrary?.statistics?.seats || "100+"}
+                      </div>
                       <div className="text-muted-foreground">Seats</div>
                     </div>
                     <div>
-                      <div className="text-2xl font-bold gradient-text">24/7</div>
+                      <div className="text-2xl font-bold gradient-text">
+                        {aboutLibrary?.statistics?.digital || "24/7"}
+                      </div>
                       <div className="text-muted-foreground">Digital Access</div>
                     </div>
                   </div>
@@ -132,11 +269,13 @@ const About = () => {
               <div className="inline-flex p-4 rounded-2xl bg-gradient-to-br from-primary to-accent mb-6">
                 <Code2 className="h-10 w-10 text-white" />
               </div>
-              <h2 className="text-4xl font-bold mb-4">About the Website</h2>
+              <h2 className="text-4xl font-bold mb-4">
+                {aboutWebsite?.title || "About the Website"}
+              </h2>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                This website was developed as an initiative to modernize and centralize access to the 
-                library's resources for students and faculty. The platform provides seamless access to 
-                our catalog, digital resources, and academic materials.
+                {aboutWebsite?.description || 
+                  "This website was developed as an initiative to modernize and centralize access to the library's resources for students and faculty. The platform provides seamless access to our catalog, digital resources, and academic materials."
+                }
               </p>
             </div>
 
@@ -148,12 +287,25 @@ const About = () => {
                   <div>
                     <h3 className="text-xl font-semibold mb-2">Project Supervisors</h3>
                     <div className="space-y-3">
-                      {supervisors.map((supervisor, index) => (
-                        <div key={index} className="space-y-1">
-                          <div className="font-medium">{supervisor.name}</div>
-                          <div className="text-sm text-muted-foreground">{supervisor.role}</div>
-                        </div>
-                      ))}
+                      {(aboutWebsite?.supervisors && aboutWebsite.supervisors.length > 0) ? (
+                        aboutWebsite.supervisors.map((supervisor, index) => (
+                          <div key={index} className="space-y-1">
+                            <div className="font-medium">{supervisor.name}</div>
+                            <div className="text-sm text-muted-foreground">{supervisor.role}</div>
+                          </div>
+                        ))
+                      ) : (
+                        <>
+                          <div className="space-y-1">
+                            <div className="font-medium">Dr. Shoaib Ahammed</div>
+                            <div className="text-sm text-muted-foreground">Project Supervisor</div>
+                          </div>
+                          <div className="space-y-1">
+                            <div className="font-medium">Manjunath H R</div>
+                            <div className="text-sm text-muted-foreground">Head of Department, BCA</div>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -169,12 +321,14 @@ const About = () => {
                       This website was designed and developed by the talented students of
                     </p>
                     <a
-                      href="https://codersclub.netlify.app"
+                      href={aboutWebsite?.team?.url || "https://codersclub.netlify.app"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-300 hover-lift"
                     >
-                      <span className="font-medium">The Coders Club</span>
+                      <span className="font-medium">
+                        {aboutWebsite?.team?.name || "The Coders Club"}
+                      </span>
                       <span className="text-xs opacity-90">↗</span>
                     </a>
                   </div>

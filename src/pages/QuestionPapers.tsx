@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FileText, Download, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -6,57 +6,131 @@ import GlassCard from "@/components/GlassCard";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 
+interface QuestionPaper {
+  title: string;
+  department: string;
+  semester: string;
+  year: string;
+  type: string;
+  file: string;
+}
+
 const QuestionPapers = () => {
   const [selectedDept, setSelectedDept] = useState("all");
   const [selectedYear, setSelectedYear] = useState("all");
+  const [questionPapers, setQuestionPapers] = useState<QuestionPaper[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Sample data - will be replaced with CMS data
-  const questionPapers = [
-    {
-      title: "Data Structures and Algorithms",
-      department: "BCA",
-      semester: "3rd Semester",
-      year: "2023",
-      type: "End Semester",
-    },
-    {
-      title: "Database Management Systems",
-      department: "BCA",
-      semester: "4th Semester",
-      year: "2023",
-      type: "Mid Semester",
-    },
-    {
-      title: "Organic Chemistry",
-      department: "Chemistry",
-      semester: "2nd Semester",
-      year: "2023",
-      type: "End Semester",
-    },
-    {
-      title: "Calculus and Analytical Geometry",
-      department: "Mathematics",
-      semester: "1st Semester",
-      year: "2024",
-      type: "End Semester",
-    },
-    {
-      title: "Classical Mechanics",
-      department: "Physics",
-      semester: "3rd Semester",
-      year: "2023",
-      type: "End Semester",
-    },
-  ];
+  useEffect(() => {
+    const loadQuestionPapers = async () => {
+      try {
+        setLoading(true);
+        
+        // Load question papers from JSON files
+        const modules = import.meta.glob('../../content/question-papers/*.json');
+        const papersData: QuestionPaper[] = [];
 
-  const departments = ["All", "BCA", "Chemistry", "Mathematics", "Physics", "Botany", "Zoology"];
-  const years = ["All", "2024", "2023", "2022", "2021"];
+        for (const path in modules) {
+          try {
+            const module = await modules[path]() as { default: QuestionPaper };
+            papersData.push(module.default);
+          } catch (err) {
+            console.warn(`Failed to load question paper from ${path}:`, err);
+          }
+        }
+
+        setQuestionPapers(papersData);
+      } catch (err) {
+        console.error('Error loading question papers:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadQuestionPapers();
+  }, []);
+
+  // Get unique departments and years from data
+  const departments = ["All", ...new Set(questionPapers.map(paper => paper.department))];
+  const years = ["All", ...new Set(questionPapers.map(paper => paper.year).sort((a, b) => b.localeCompare(a)))];
 
   const filteredPapers = questionPapers.filter((paper) => {
     const deptMatch = selectedDept === "all" || paper.department === selectedDept;
     const yearMatch = selectedYear === "all" || paper.year === selectedYear;
     return deptMatch && yearMatch;
   });
+
+  const handleDownload = (fileUrl: string, title: string) => {
+    // Create a temporary link to trigger download
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = `${title}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+
+        <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto">
+            {/* Header Loading */}
+            <div className="text-center mb-12">
+              <div className="inline-flex p-4 rounded-2xl bg-gray-300 mb-6 animate-pulse">
+                <FileText className="h-12 w-12 text-gray-400" />
+              </div>
+              <div className="h-10 bg-gray-300 rounded w-64 mx-auto mb-4 animate-pulse"></div>
+              <div className="h-4 bg-gray-300 rounded w-96 mx-auto animate-pulse"></div>
+            </div>
+
+            {/* Filters Loading */}
+            <div className="p-6 rounded-2xl bg-gray-300 mb-8 animate-pulse">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-400 rounded w-24 mb-2"></div>
+                  <div className="h-10 bg-gray-400 rounded"></div>
+                </div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-400 rounded w-16 mb-2"></div>
+                  <div className="h-10 bg-gray-400 rounded"></div>
+                </div>
+                <div className="w-32 h-10 bg-gray-400 rounded"></div>
+              </div>
+            </div>
+
+            {/* Papers Loading */}
+            <div className="mb-6">
+              <div className="h-8 bg-gray-300 rounded w-48 animate-pulse"></div>
+            </div>
+
+            <div className="grid gap-4">
+              {[1, 2, 3, 4, 5].map((item) => (
+                <div key={item} className="p-6 rounded-2xl bg-gray-300 animate-pulse">
+                  <div className="flex gap-4">
+                    <div className="w-16 h-20 bg-gray-400 rounded-lg"></div>
+                    <div className="flex-1">
+                      <div className="h-6 bg-gray-400 rounded w-3/4 mb-3"></div>
+                      <div className="flex gap-2">
+                        <div className="w-20 h-6 bg-gray-400 rounded-full"></div>
+                        <div className="w-24 h-6 bg-gray-400 rounded-full"></div>
+                        <div className="w-16 h-6 bg-gray-400 rounded-full"></div>
+                        <div className="w-28 h-6 bg-gray-400 rounded-full"></div>
+                      </div>
+                    </div>
+                    <div className="w-32 h-10 bg-gray-400 rounded"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -125,53 +199,61 @@ const QuestionPapers = () => {
           </div>
 
           {/* Question Papers Grid */}
-          <div className="grid gap-4">
-            {filteredPapers.map((paper, index) => (
-              <GlassCard
-                key={index}
-                hover
-                className="animate-fade-in-up"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                  <div className="flex gap-4 flex-1">
-                    <div className="flex-shrink-0">
-                      <div className="w-16 h-20 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
-                        <FileText className="h-8 w-8 text-white" />
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold mb-2">{paper.title}</h3>
-                      <div className="flex flex-wrap gap-2 text-sm">
-                        <span className="px-3 py-1 bg-primary/10 text-primary rounded-full font-medium">
-                          {paper.department}
-                        </span>
-                        <span className="px-3 py-1 bg-secondary rounded-full">
-                          {paper.semester}
-                        </span>
-                        <span className="px-3 py-1 bg-secondary rounded-full">
-                          {paper.year}
-                        </span>
-                        <span className="px-3 py-1 bg-secondary rounded-full">
-                          {paper.type}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <Button className="gap-2 flex-shrink-0">
-                    <Download className="h-4 w-4" />
-                    Download
-                  </Button>
-                </div>
-              </GlassCard>
-            ))}
-          </div>
-
-          {filteredPapers.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg">
-                No question papers found for the selected filters.
+          {filteredPapers.length === 0 ? (
+            <GlassCard className="text-center py-12">
+              <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">No Question Papers Found</h3>
+              <p className="text-muted-foreground">
+                {questionPapers.length === 0 
+                  ? "Question papers will appear here once added through the CMS."
+                  : "No papers found for the selected filters."
+                }
               </p>
+            </GlassCard>
+          ) : (
+            <div className="grid gap-4">
+              {filteredPapers.map((paper, index) => (
+                <GlassCard
+                  key={index}
+                  hover
+                  className="animate-fade-in-up"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                    <div className="flex gap-4 flex-1">
+                      <div className="flex-shrink-0">
+                        <div className="w-16 h-20 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
+                          <FileText className="h-8 w-8 text-white" />
+                        </div>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold mb-2">{paper.title}</h3>
+                        <div className="flex flex-wrap gap-2 text-sm">
+                          <span className="px-3 py-1 bg-primary/10 text-primary rounded-full font-medium">
+                            {paper.department}
+                          </span>
+                          <span className="px-3 py-1 bg-secondary rounded-full">
+                            {paper.semester}
+                          </span>
+                          <span className="px-3 py-1 bg-secondary rounded-full">
+                            {paper.year}
+                          </span>
+                          <span className="px-3 py-1 bg-secondary rounded-full">
+                            {paper.type}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <Button 
+                      className="gap-2 flex-shrink-0"
+                      onClick={() => handleDownload(paper.file, paper.title)}
+                    >
+                      <Download className="h-4 w-4" />
+                      Download
+                    </Button>
+                  </div>
+                </GlassCard>
+              ))}
             </div>
           )}
 
