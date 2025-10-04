@@ -3,39 +3,25 @@ import GlassCard from "@/components/GlassCard";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 
-const Staff = () => {
-  // Sample staff data - will be replaced with CMS data
-  const staff = [
-    {
-      name: "Dr. Rajesh Kumar",
-      position: "Chief Librarian",
-      email: "rajesh@mvgsc.edu",
-      phone: "+91-XXX-XXX-1234",
-      department: "Library Administration",
-    },
-    {
-      name: "Mrs. Priya Sharma",
-      position: "Assistant Librarian",
-      email: "priya@mvgsc.edu",
-      phone: "+91-XXX-XXX-2345",
-      department: "Circulation & Reference",
-    },
-    {
-      name: "Mr. Arun Patel",
-      position: "Library Assistant",
-      email: "arun@mvgsc.edu",
-      phone: "+91-XXX-XXX-3456",
-      department: "Technical Services",
-    },
-    {
-      name: "Ms. Anita Desai",
-      position: "Digital Resources Manager",
-      email: "anita@mvgsc.edu",
-      phone: "+91-XXX-XXX-4567",
-      department: "E-Resources",
-    },
-  ];
+// Import all Markdown or YAML files from content/staff
+// This will include every file Decap CMS creates
+const staffFiles = import.meta.glob("/content/staff/*.{md,yml,yaml}", { eager: true });
 
+// Parse frontmatter (metadata) from the imported files
+const staff = Object.values(staffFiles).map((file: any) => {
+  const data = file.attributes || file.frontmatter || {};
+  return {
+    name: data.name,
+    position: data.position,
+    department: data.department,
+    email: data.email,
+    phone: data.phone,
+    photo: data.photo,
+    bio: data.bio,
+  };
+});
+
+const Staff = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -63,13 +49,21 @@ const Staff = () => {
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="flex flex-col sm:flex-row gap-6">
-                  {/* Avatar Placeholder */}
+                  {/* Avatar */}
                   <div className="flex-shrink-0">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                      <span className="text-3xl font-bold text-white">
-                        {member.name.split(" ").map(n => n[0]).join("")}
-                      </span>
-                    </div>
+                    {member.photo ? (
+                      <img
+                        src={member.photo}
+                        alt={member.name}
+                        className="w-24 h-24 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                        <span className="text-3xl font-bold text-white">
+                          {member.name.split(" ").map((n: string) => n[0]).join("")}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Details */}
@@ -100,27 +94,6 @@ const Staff = () => {
               </GlassCard>
             ))}
           </div>
-
-          {/* Additional Information */}
-          <GlassCard className="mt-12 bg-gradient-to-br from-primary/5 to-accent/5">
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold">Library Hours</h2>
-              <div className="max-w-md mx-auto space-y-2 text-muted-foreground">
-                <div className="flex justify-between">
-                  <span>Monday - Friday:</span>
-                  <span className="font-medium">8:00 AM - 8:00 PM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Saturday:</span>
-                  <span className="font-medium">9:00 AM - 5:00 PM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Sunday:</span>
-                  <span className="font-medium">Closed</span>
-                </div>
-              </div>
-            </div>
-          </GlassCard>
         </div>
       </div>
 
