@@ -12,6 +12,7 @@ collections:
     folder: "content/books"
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    format: "json"
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Author", name: "author", widget: "string" }
@@ -22,12 +23,13 @@ collections:
       - { label: "Cover Image", name: "cover", widget: "image", required: false }
       - { label: "Description", name: "description", widget: "text", required: false }
 
-  # Staff Collection
+  # Staff Collection - FIXED: Using JSON format and proper slug
   - name: "staff"
     label: "Staff Members"
     folder: "content/staff"
     create: true
-    slug: "{{slug}}"
+    slug: "{{name | slugify}}"
+    format: "json"
     fields:
       - { label: "Name", name: "name", widget: "string" }
       - { label: "Position", name: "position", widget: "string" }
@@ -43,6 +45,7 @@ collections:
     folder: "content/question-papers"
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    format: "json"
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Department", name: "department", widget: "select", options: ["BCA", "Chemistry", "Mathematics", "Physics", "Botany", "Zoology"] }
@@ -57,6 +60,7 @@ collections:
     folder: "content/e-resources"
     create: true
     slug: "{{slug}}"
+    format: "json"
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Description", name: "description", widget: "text" }
@@ -71,6 +75,7 @@ collections:
     folder: "content/announcements"
     create: true
     slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    format: "json"
     fields:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Publish Date", name: "date", widget: "datetime" }
@@ -78,14 +83,14 @@ collections:
       - { label: "Priority", name: "priority", widget: "select", options: ["high", "medium", "low"], default: "medium" }
       - { label: "Image", name: "image", widget: "image", required: false }
 
-  # Pages Collection
+  # Pages Collection - Updated to use JSON
   - name: "pages"
     label: "Pages"
     files:
       # About College
       - label: "About College"
         name: "about-college"
-        file: "content/pages/about-college.md"
+        file: "content/pages/about-college.json"
         fields:
           - { label: "Title", name: "title", widget: "string", default: "About the College" }
           - { label: "Content", name: "body", widget: "markdown" }
@@ -94,7 +99,7 @@ collections:
       # About Library
       - label: "About Library"
         name: "about-library"
-        file: "content/pages/about-library.md"
+        file: "content/pages/about-library.json"
         fields:
           - { label: "Title", name: "title", widget: "string", default: "About the Library" }
           - { label: "Content", name: "body", widget: "markdown" }
@@ -111,7 +116,7 @@ collections:
       # About Website
       - label: "About Website"
         name: "about-website"
-        file: "content/pages/about-website.md"
+        file: "content/pages/about-website.json"
         fields:
           - { label: "Title", name: "title", widget: "string", default: "About the Website" }
           - { label: "Description", name: "description", widget: "text" }
@@ -128,13 +133,13 @@ collections:
               - { label: "Team Name", name: "name", widget: "string", default: "The Coders Club" }
               - { label: "Website URL", name: "url", widget: "string", default: "https://codersclub.netlify.app" }
 
-  # Settings
+  # Settings - Updated to use JSON
   - name: "settings"
     label: "Site Settings"
     files:
       - label: "Contact Information"
         name: "contact"
-        file: "content/settings/contact.yml"
+        file: "content/settings/contact.json"
         fields:
           - { label: "Address", name: "address", widget: "text" }
           - { label: "Phone", name: "phone", widget: "string" }
@@ -144,7 +149,7 @@ collections:
 
       - label: "Library Hours"
         name: "hours"
-        file: "content/settings/hours.yml"
+        file: "content/settings/hours.json"
         fields:
           - label: "Weekday Hours"
             name: "weekday"
@@ -165,7 +170,7 @@ collections:
 
       - label: "Hero Section"
         name: "hero"
-        file: "content/settings/hero.yml"
+        file: "content/settings/hero.json"
         fields:
           - { label: "Heading", name: "heading", widget: "string" }
           - { label: "Subheading", name: "subheading", widget: "text" }

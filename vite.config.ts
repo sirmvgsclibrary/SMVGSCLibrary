@@ -15,4 +15,12 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Add these to handle markdown files properly
+  assetsInclude: ['**/*.md'],
+  build: {
+    rollupOptions: {
+      // Exclude markdown files from JS processing
+      external: [/\.md$/]
+    }
+  }
 }));
