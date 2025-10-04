@@ -1,7 +1,4 @@
-import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import GlassCard from "@/components/GlassCard";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -187,90 +184,58 @@ const Contact = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Contact Form */}
+            {/* Library Hours */}
             <GlassCard className="animate-fade-in-up">
-              <h2 className="text-2xl font-bold mb-6">Send us a Message</h2>
-              <form className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">First Name</label>
-                    <Input placeholder="John" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Last Name</label>
-                    <Input placeholder="Doe" />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Email</label>
-                    <Input type="email" placeholder="john.doe@example.com" />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Subject</label>
-                  <Input placeholder="How can we help you?" />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Message</label>
-                  <Textarea
-                    placeholder="Type your message here..."
-                    rows={5}
-                  />
-                </div>
-
-                <Button size="lg" className="w-full gap-2">
-                  <Send className="h-4 w-4" />
-                  Send Message
-                </Button>
-              </form>
-            </GlassCard>
-
-            {/* Library Hours & Map */}
-            <div className="space-y-6">
-              <GlassCard className="animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
-                <div className="flex items-start gap-3 mb-4">
-                  <Clock className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold mb-4">Library Hours</h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center pb-2 border-b border-border/50">
-                        <span className="font-medium">
-                          {libraryHours?.weekday?.days || "Monday - Friday"}
-                        </span>
-                        <span className="text-muted-foreground">
-                          {libraryHours?.weekday?.hours || "8:00 AM - 8:00 PM"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center pb-2 border-b border-border/50">
-                        <span className="font-medium">Saturday</span>
-                        <span className="text-muted-foreground">
-                          {libraryHours?.saturday?.hours || "9:00 AM - 5:00 PM"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">Sunday</span>
-                        <span className="text-red-500 font-medium">
-                          {libraryHours?.sunday?.status || "Closed"}
-                        </span>
-                      </div>
+              <div className="flex items-start gap-3 mb-4">
+                <Clock className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold mb-4">Library Hours</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center pb-2 border-b border-border/50">
+                      <span className="font-medium">
+                        {libraryHours?.weekday?.days || "Monday - Friday"}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {libraryHours?.weekday?.hours || "8:00 AM - 8:00 PM"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center pb-2 border-b border-border/50">
+                      <span className="font-medium">Saturday</span>
+                      <span className="text-muted-foreground">
+                        {libraryHours?.saturday?.hours || "9:00 AM - 5:00 PM"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Sunday</span>
+                      <span className="text-red-500 font-medium">
+                        {libraryHours?.sunday?.status || "Closed"}
+                      </span>
                     </div>
                   </div>
                 </div>
-              </GlassCard>
+              </div>
+            </GlassCard>
 
-              {/* Map Placeholder */}
-              <GlassCard className="animate-fade-in-up" style={{ animationDelay: "0.2s" }}>
-                <h3 className="text-xl font-semibold mb-4">Location</h3>
-                <div className="w-full h-64 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg flex items-center justify-center">
-                  <div className="text-center text-muted-foreground">
-                    <MapPin className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>Interactive Map Coming Soon</p>
-                  </div>
-                </div>
-              </GlassCard>
-            </div>
+            {/* Interactive Map */}
+            <GlassCard className="animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
+              <h3 className="text-xl font-semibold mb-4">Location</h3>
+              <div className="w-full rounded-lg overflow-hidden">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d15497.685676054243!2d75.679545!3d13.813715!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bbb01b2af9f990d%3A0xb22e8b8aed6ff3ca!2sSir%20M%20V%20Govt%20Science%20College%20Bommanakatte!5e0!3m2!1sen!2sus!4v1759596070864!5m2!1sen!2sus" 
+                  width="100%" 
+                  height="300"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="rounded-lg"
+                  title="Sir M V Govt Science College Location"
+                />
+              </div>
+              <p className="text-sm text-muted-foreground mt-3 text-center">
+                Sir M. Visvesvaraya Government Science College, Bommanakatte
+              </p>
+            </GlassCard>
           </div>
 
           {/* Additional Info */}

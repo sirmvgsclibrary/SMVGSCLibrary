@@ -13,7 +13,7 @@ const Footer = () => {
                 <BookOpen className="h-5 w-5 text-primary-foreground" />
               </div>
               <div>
-                <div className="font-bold gradient-text">MVGSC Library</div>
+                <div className="font-bold gradient-text">Sir M V G S C Library</div>
               </div>
             </div>
             <p className="text-sm text-muted-foreground">
