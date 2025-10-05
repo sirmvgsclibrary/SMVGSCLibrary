@@ -1,5 +1,5 @@
 // src/lib/google-sheets.ts
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRVREeHICWFF3ghlAsqHmNQqxxEl27jIZUQPI-wI3KLz0eGp6_RTd8xKWvy65PPp8l7GEuQRjTZrPQ2/pub?gid=870322603&single=true&output=csv';
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwYoiETHqEVR5ZOXsKXk1WNQ46XlvHpje-lbxXekdnrOA9U2IMTpVFoNmOi9KuX8saKYO7vr_lWatM/pub?gid=1315133597&single=true&output=csv';
 
 export interface Book {
   id: string;
