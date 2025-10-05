@@ -6,7 +6,7 @@ import collegeImage from "@/assets/college-building.jpg";
 import libraryImage from "@/assets/library-interior.jpg";
 import { useEffect, useState } from "react";
 
-// Define the missing interfaces
+// Define the interfaces
 interface PageData {
   title: string;
   body: string;
@@ -39,10 +39,6 @@ const About = () => {
   const [loading, setLoading] = useState(true);
   const [visitorCount, setVisitorCount] = useState<number | null>(null);
   const [visitorLoading, setVisitorLoading] = useState(true);
-
-  // CountAPI configuration
-  const COUNTAPI_NAMESPACE = 'mvgsc-library';
-  const COUNTAPI_KEY = 'total-website-visitors';
 
   useEffect(() => {
     const loadAboutData = async () => {
@@ -82,50 +78,31 @@ const About = () => {
     loadAboutData();
   }, []);
 
-  // Track website visit only once per session
+  // ✅ VISITOR COUNTER - Starting from 0
   useEffect(() => {
-    const trackWebsiteVisit = async () => {
+    const trackWebsiteVisit = () => {
       try {
         setVisitorLoading(true);
+        
+        // Get current count from localStorage or start from 0
+        const storedCount = localStorage.getItem('website_visitors');
+        let currentCount = storedCount ? parseInt(storedCount) : 0;
         
         // Check if we've already counted this session
         const hasCounted = sessionStorage.getItem('website_visit_counted');
         
         if (!hasCounted) {
-          // This is a new session - increment the counter
-          console.log('🆕 New website visitor detected - counting...');
-          
-          const response = await fetch(
-            `https://api.countapi.xyz/hit/${COUNTAPI_NAMESPACE}/${COUNTAPI_KEY}`
-          );
-          
-          if (response.ok) {
-            const data = await response.json();
-            setVisitorCount(data.value);
-            // Mark this session as counted
-            sessionStorage.setItem('website_visit_counted', 'true');
-            console.log('✅ Visitor counted. Total:', data.value);
-          } else {
-            throw new Error('CountAPI hit failed');
-          }
-        } else {
-          // Already counted this session, just get the current count
-          console.log('📊 Session already counted - fetching current total');
-          const response = await fetch(
-            `https://api.countapi.xyz/get/${COUNTAPI_NAMESPACE}/${COUNTAPI_KEY}`
-          );
-          
-          if (response.ok) {
-            const data = await response.json();
-            setVisitorCount(data.value);
-          } else {
-            throw new Error('CountAPI get failed');
-          }
+          // This is a NEW visitor session - increment the count
+          currentCount += 1;
+          localStorage.setItem('website_visitors', currentCount.toString());
+          sessionStorage.setItem('website_visit_counted', 'true');
         }
+        
+        setVisitorCount(currentCount);
+        
       } catch (error) {
-        console.error('❌ Error with visitor counter:', error);
-        // Set a realistic fallback number
-        setVisitorCount(1542);
+        console.error('Visitor counter error:', error);
+        setVisitorCount(0);
       } finally {
         setVisitorLoading(false);
       }
@@ -399,7 +376,7 @@ const About = () => {
               </GlassCard>
             </div>
 
-            {/* Visitor Counter */}
+            {/* ✅ VISITOR COUNTER - Starting from 0 */}
             <GlassCard className="mb-12 bg-gradient-to-br from-primary/5 to-accent/5 animate-fade-in-up">
               <div className="text-center space-y-4">
                 <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-primary to-accent">
@@ -408,9 +385,12 @@ const About = () => {
                 <h3 className="text-2xl font-bold">Website Visitors</h3>
                 <div className="flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-4xl font-bold gradient-text mb-2">
+                    <div className="text-4xl font-bold gradient-text mb-2 min-h-[48px] flex items-center justify-center">
                       {visitorLoading ? (
-                        <div className="h-12 w-32 bg-gradient-to-r from-primary/20 to-accent/20 rounded-lg animate-pulse mx-auto"></div>
+                        <div className="flex items-center gap-2">
+                          <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                          <span className="text-sm text-muted-foreground">Loading...</span>
+                        </div>
                       ) : (
                         formatNumber(visitorCount || 0)
                       )}
@@ -419,13 +399,18 @@ const About = () => {
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  {visitorCount 
-                    ? `You are one of ${formatNumber(visitorCount)} visitors who discovered our digital library`
-                    : "Tracking our digital footprint..."
+                  {visitorCount !== null && visitorCount > 0
+                    ? `You are visitor #${formatNumber(visitorCount)} to our digital library`
+                    : visitorCount === 0
+                    ? "Be the first visitor to our digital library! 🎉"
+                    : "Welcome to our digital library!"
                   }
                 </p>
                 <div className="text-xs text-muted-foreground pt-2 border-t border-border/30">
-                  Counts each website visitor only once
+                  {visitorCount === 0 
+                    ? "Refresh to become visitor #1!"
+                    : "Counts each website visitor only once"
+                  }
                 </div>
               </div>
             </GlassCard>
