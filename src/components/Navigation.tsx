@@ -29,7 +29,7 @@ const Navigation = () => {
               <BookOpen className="h-6 w-6 text-primary-foreground" />
             </div>
             <div className="hidden sm:block">
-              <div className="font-bold text-lg gradient-text">MVGSC Library</div>
+              <div className="font-bold text-lg gradient-text">Sir M V G S C Library</div>
               <div className="text-xs text-muted-foreground">Knowledge Gateway</div>
             </div>
           </Link>

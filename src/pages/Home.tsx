@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Search, BookOpen, FileText, Users, ChevronRight, Bell } from "lucide-react";
+import { Search, BookOpen, FileText, Users, ChevronRight, Bell, X, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/GlassCard";
 import Navigation from "@/components/Navigation";
@@ -27,6 +27,8 @@ const Home = () => {
   const [heroData, setHeroData] = useState<HeroData | null>(null);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(false);
 
   const quickLinks = [
     {
@@ -106,6 +108,16 @@ const Home = () => {
     loadHomeData();
   }, []);
 
+  const openImage = (imageUrl: string) => {
+    setImageLoading(true);
+    setSelectedImage(imageUrl);
+  };
+
+  const closeImage = () => {
+    setSelectedImage(null);
+    setImageLoading(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -156,6 +168,43 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fade-in">
+          <div className="relative max-w-4xl max-h-full">
+            {/* Close Button */}
+            <button
+              onClick={closeImage}
+              className="absolute -top-12 right-0 z-10 p-2 text-white hover:text-primary transition-colors duration-300"
+            >
+              <X className="h-6 w-6" />
+            </button>
+            
+            {/* Image Container */}
+            <div className="relative rounded-2xl overflow-hidden bg-card shadow-2xl">
+              {imageLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-card">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                </div>
+              )}
+              <img
+                src={selectedImage}
+                alt="Announcement"
+                className={`max-w-full max-h-[80vh] object-contain transition-opacity duration-500 ${
+                  imageLoading ? 'opacity-0' : 'opacity-100'
+                }`}
+                onLoad={() => setImageLoading(false)}
+              />
+            </div>
+            
+            {/* Download/View Hint */}
+            <div className="text-center mt-4 text-white/70 text-sm">
+              Click outside or press ESC to close
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Hero Section */}
       <section className="relative pt-24 pb-20 overflow-hidden">
@@ -273,25 +322,67 @@ const Home = () => {
               {announcements.map((announcement, index) => (
                 <GlassCard
                   key={index}
-                  className="animate-fade-in-up"
+                  className="animate-fade-in-up group relative overflow-hidden"
                   hover
+                  style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <div className="flex flex-col h-full">
-                    <div className="text-sm text-primary font-medium mb-2">
-                      {new Date(announcement.date).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="text-sm text-primary font-medium">
+                        {new Date(announcement.date).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </div>
+                      {announcement.priority === 'high' && (
+                        <span className="px-2 py-1 text-xs bg-red-500/10 text-red-600 dark:text-red-400 rounded-full font-medium">
+                          Important
+                        </span>
+                      )}
                     </div>
-                    <h3 className="text-xl font-semibold mb-3">{announcement.title}</h3>
-                    <p className="text-muted-foreground flex-grow">{announcement.description}</p>
+
+                    {/* Title */}
+                    <h3 className="text-xl font-semibold mb-3 text-foreground group-hover:text-primary transition-colors duration-300">
+                      {announcement.title}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-muted-foreground flex-grow mb-4 leading-relaxed">
+                      {announcement.description}
+                    </p>
+
+                    {/* Image with Enhanced Interaction */}
                     {announcement.image && (
-                      <img
-                        src={announcement.image}
-                        alt={announcement.title}
-                        className="mt-4 rounded-lg w-full h-32 object-cover"
-                      />
+                      <div className="relative mt-auto">
+                        <div 
+                          className="relative rounded-lg overflow-hidden cursor-pointer group/image bg-muted/50"
+                          onClick={() => openImage(announcement.image!)}
+                        >
+                          <img
+                            src={announcement.image}
+                            alt={announcement.title}
+                            className="w-full h-48 object-cover transition-all duration-500 group-hover/image:scale-105"
+                          />
+                          
+                          {/* Overlay with Zoom Icon */}
+                          <div className="absolute inset-0 bg-black/0 group-hover/image:bg-black/30 transition-all duration-300 flex items-center justify-center">
+                            <div className="transform translate-y-4 opacity-0 group-hover/image:translate-y-0 group-hover/image:opacity-100 transition-all duration-300">
+                              <div className="p-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
+                                <ZoomIn className="h-5 w-5 text-white" />
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Click Hint */}
+                          <div className="absolute bottom-2 left-2 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
+                            <span className="text-xs text-white/80 bg-black/50 rounded px-2 py-1 backdrop-blur-sm">
+                              Click to view
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </GlassCard>
