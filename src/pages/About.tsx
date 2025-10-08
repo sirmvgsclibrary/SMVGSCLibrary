@@ -78,37 +78,42 @@ const About = () => {
     loadAboutData();
   }, []);
 
-  // ✅ VISITOR COUNTER - Starting from 0
+  // ✅ SIMPLE VISITOR COUNTER - Works everywhere
   useEffect(() => {
     const trackWebsiteVisit = () => {
       try {
         setVisitorLoading(true);
         
-        // Get current count from localStorage or start from 0
-        const storedCount = localStorage.getItem('website_visitors');
+        // Use a unique key for this deployment
+        const storageKey = 'mvgsc_website_visitors_v2';
+        const sessionKey = 'mvgsc_visit_counted_v2';
+        
+        const storedCount = localStorage.getItem(storageKey);
         let currentCount = storedCount ? parseInt(storedCount) : 0;
         
-        // Check if we've already counted this session
-        const hasCounted = sessionStorage.getItem('website_visit_counted');
+        const hasCounted = sessionStorage.getItem(sessionKey);
         
         if (!hasCounted) {
-          // This is a NEW visitor session - increment the count
           currentCount += 1;
-          localStorage.setItem('website_visitors', currentCount.toString());
-          sessionStorage.setItem('website_visit_counted', 'true');
+          localStorage.setItem(storageKey, currentCount.toString());
+          sessionStorage.setItem(sessionKey, 'true');
+          
+          console.log(`Visitor count updated: ${currentCount}`);
         }
         
         setVisitorCount(currentCount);
         
       } catch (error) {
         console.error('Visitor counter error:', error);
-        setVisitorCount(0);
+        setVisitorCount(1); // Default to 1 if there's an error
       } finally {
         setVisitorLoading(false);
       }
     };
 
-    trackWebsiteVisit();
+    // Add a small delay to ensure component is mounted
+    const timer = setTimeout(trackWebsiteVisit, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   // Format number with commas
@@ -358,7 +363,7 @@ const About = () => {
                   <div>
                     <h3 className="text-xl font-semibold mb-2">Development Team</h3>
                     <p className="text-muted-foreground mb-4">
-                      This website was designed and developed by the talented students of
+                      This website was designed and developed by 
                     </p>
                     <a
                       href={aboutWebsite?.team?.url || "https://codersclub.netlify.app"}
@@ -376,7 +381,7 @@ const About = () => {
               </GlassCard>
             </div>
 
-            {/* ✅ VISITOR COUNTER - Starting from 0 */}
+            {/* ✅ VISITOR COUNTER - Updated Version */}
             <GlassCard className="mb-12 bg-gradient-to-br from-primary/5 to-accent/5 animate-fade-in-up">
               <div className="text-center space-y-4">
                 <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-primary to-accent">
@@ -391,8 +396,10 @@ const About = () => {
                           <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
                           <span className="text-sm text-muted-foreground">Loading...</span>
                         </div>
+                      ) : visitorCount !== null ? (
+                        formatNumber(visitorCount)
                       ) : (
-                        formatNumber(visitorCount || 0)
+                        "0"
                       )}
                     </div>
                     <p className="text-muted-foreground font-medium">Total Unique Visitors</p>
@@ -401,9 +408,7 @@ const About = () => {
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
                   {visitorCount !== null && visitorCount > 0
                     ? `You are visitor #${formatNumber(visitorCount)} to our digital library`
-                    : visitorCount === 0
-                    ? "Be the first visitor to our digital library! 🎉"
-                    : "Welcome to our digital library!"
+                    : "Welcome to our digital library! 🎉"
                   }
                 </p>
                 <div className="text-xs text-muted-foreground pt-2 border-t border-border/30">
