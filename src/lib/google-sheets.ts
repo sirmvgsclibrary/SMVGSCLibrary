@@ -1,5 +1,8 @@
 // src/lib/google-sheets.ts
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwYoiETHqEVR5ZOXsKXk1WNQ46XlvHpje-lbxXekdnrOA9U2IMTpVFoNmOi9KuX8saKYO7vr_lWatM/pub?gid=1315133597&single=true&output=csv';
+
+// --- 📘 BOOKS SHEET (OPAC) CONFIG ---
+const SHEET_CSV_URL =
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwYoiETHqEVR5ZOXsKXk1WNQ46XlvHpje-lbxXekdnrOA9U2IMTpVFoNmOi9KuX8saKYO7vr_lWatM/pub?gid=1315133597&single=true&output=csv';
 
 export interface Book {
   id: string;
@@ -15,44 +18,44 @@ export interface Book {
 }
 
 export const fetchBooksFromSheets = async (
-  searchQuery: string = '', 
-  page: number = 1, 
+  searchQuery: string = '',
+  page: number = 1,
   pageSize: number = 20
 ): Promise<{ books: Book[]; total: number; hasMore: boolean }> => {
   try {
     console.log('📚 Fetching books from Google Sheets...');
-    
     const response = await fetch(SHEET_CSV_URL);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
     }
-    
+
     const csvText = await response.text();
     const books = parseCSV(csvText);
-    
+
     console.log(`✅ Successfully parsed ${books.length} books`);
-    
+
     // Apply search filter
     let filteredBooks = books;
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filteredBooks = books.filter(book => 
-        book.title.toLowerCase().includes(query) ||
-        book.author.toLowerCase().includes(query) ||
-        book.language.toLowerCase().includes(query) ||
-        book.department.toLowerCase().includes(query)
+      filteredBooks = books.filter(
+        (book) =>
+          book.title.toLowerCase().includes(query) ||
+          book.author.toLowerCase().includes(query) ||
+          book.language.toLowerCase().includes(query) ||
+          book.department.toLowerCase().includes(query)
       );
     }
-    
-    // Apply pagination
+
+    // Pagination
     const startIndex = (page - 1) * pageSize;
     const paginatedBooks = filteredBooks.slice(startIndex, startIndex + pageSize);
-    
+
     return {
       books: paginatedBooks,
       total: filteredBooks.length,
-      hasMore: (startIndex + pageSize) < filteredBooks.length
+      hasMore: startIndex + pageSize < filteredBooks.length,
     };
   } catch (error) {
     console.error('❌ Error fetching from Google Sheets:', error);
@@ -60,64 +63,44 @@ export const fetchBooksFromSheets = async (
   }
 };
 
-// Fixed CSV parser for your specific format
+// --- CSV PARSER FOR BOOKS ---
 const parseCSV = (csvText: string): Book[] => {
-  const lines = csvText.split('\n').filter(line => line.trim());
-  
-  if (lines.length <= 4) {
-    console.log('⚠️ Not enough data lines in CSV');
-    return [];
-  }
-  
-  // Your actual headers are on line 4 (index 3)
+  const lines = csvText.split('\n').filter((line) => line.trim());
+  if (lines.length <= 4) return [];
+
   const headerLine = lines[3];
   const headers = parseCSVLine(headerLine);
-  
-  console.log('📋 Actual Headers:', headers);
-  
-  // Process data rows starting from line 5 (index 4)
+
   const books = lines.slice(4).map((line, index) => {
     const values = parseCSVLine(line);
-    
     const book: any = {};
-    headers.forEach((header, colIndex) => {
-      book[header] = values[colIndex] || '';
-    });
-    
-    // Map to your actual column names
+    headers.forEach((header, colIndex) => (book[header] = values[colIndex] || ''));
+
     return {
       id: book['ACCESSION_NO (M)'] || `book-${index}`,
       title: book['TITLE (M)'] || 'Unknown Title',
       author: book['FIRST AUTHOR (personal Author only)- M'] || 'Unknown Author',
-      isbn: book['ACCESSION_NO (M)'] || '', // Using Accession No as ISBN
+      isbn: book['ACCESSION_NO (M)'] || '',
       department: book['SUBJECT ( M)'] || 'General',
-      available: true, // Assuming all books are available
-      location: 'Library', // Default location
+      available: true,
+      location: 'Library',
       language: book['LANGUAGE CODE (M)'] || 'Unknown',
       year: book['YEAR (yyyy)(M)'] || '',
-      cost: book['COST (M)'] || ''
+      cost: book['COST (M)'] || '',
     };
-  }).filter(book => book.title !== 'Unknown Title' && book.title.trim() !== '');
-  
-  console.log(`📊 Processed ${books.length} valid books`);
-  
-  // Show first few books for verification
-  if (books.length > 0) {
-    console.log('📖 Sample books:', books.slice(0, 3));
-  }
-  
-  return books;
+  });
+
+  return books.filter((book) => book.title && book.title !== 'Unknown Title');
 };
 
-// CSV line parser
+// --- Generic CSV line parser ---
 const parseCSVLine = (line: string): string[] => {
   const result: string[] = [];
   let current = '';
   let inQuotes = false;
-  
+
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
-    
     if (char === '"') {
       inQuotes = !inQuotes;
     } else if (char === ',' && !inQuotes) {
@@ -127,8 +110,62 @@ const parseCSVLine = (line: string): string[] => {
       current += char;
     }
   }
-  
-  // Push the last field
+
   result.push(current.trim());
   return result;
+};
+
+// ============================================================================
+// 🧾 QUESTION PAPERS SECTION (New)
+// ============================================================================
+
+const QUESTION_PAPERS_SHEET_URL =
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtjRMgUQ55lAJxPqb4XKCV2ftLhnbccWwy-Oe3gs8Px9CQKou4ZNbTcTITFQAzr9bnbbtPZMXUclU2/pub?gid=716050975&single=true&output=csv'; // <-- Replace with your actual published link
+
+export interface QuestionPaper {
+  title: string;
+  department: string;
+  semester: string;
+  year: string;
+  type: string;
+  file: string;
+}
+
+export const fetchQuestionPapersFromSheets = async (): Promise<QuestionPaper[]> => {
+  try {
+    console.log('📄 Fetching question papers from Google Sheets...');
+    const response = await fetch(QUESTION_PAPERS_SHEET_URL);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch question papers: ${response.status} ${response.statusText}`);
+    }
+
+    const csvText = await response.text();
+    const papers = parseQuestionPaperCSV(csvText);
+    console.log(`✅ Loaded ${papers.length} question papers`);
+    return papers;
+  } catch (error) {
+    console.error('❌ Error fetching question papers:', error);
+    return [];
+  }
+};
+
+const parseQuestionPaperCSV = (csvText: string): QuestionPaper[] => {
+  const lines = csvText.split('\n').filter((line) => line.trim());
+  const headers = lines[0].split(',').map((h) => h.trim());
+
+  return lines.slice(1).map((line) => {
+    const values = line.split(',');
+    const paper: any = {};
+    headers.forEach((header, i) => (paper[header] = values[i] || ''));
+
+    return {
+      title: paper['title'] || 'Untitled Paper',
+      department: paper['department'] || 'General',
+      semester: paper['semester'] || '',
+      year: paper['year'] || '',
+      type: paper['type'] || '',
+      file: paper['file'] || '',
+    };
+  });
 };

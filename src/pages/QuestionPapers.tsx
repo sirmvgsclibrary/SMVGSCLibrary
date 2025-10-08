@@ -1,10 +1,20 @@
+// src/pages/question-paper.tsx
 import { useState, useEffect } from "react";
 import { FileText, Download, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import GlassCard from "@/components/GlassCard";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+
+const SHEET_CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vRtjRMgUQ55lAJxPqb4XKCV2ftLhnbccWwy-Oe3gs8Px9CQKou4ZNbTcTITFQAzr9bnbbtPZMXUclU2/pub?gid=716050975&single=true&output=csv"; // 🔗 Replace this with your real Google Sheet CSV link
 
 interface QuestionPaper {
   title: string;
@@ -12,57 +22,43 @@ interface QuestionPaper {
   semester: string;
   year: string;
   type: string;
-  file: string;
+  file: string; // PDF URL
 }
 
 const QuestionPapers = () => {
   const [selectedDept, setSelectedDept] = useState("all");
   const [selectedYear, setSelectedYear] = useState("all");
-  const [questionPapers, setQuestionPapers] = useState<QuestionPaper[]>([]);
+  const [papers, setPapers] = useState<QuestionPaper[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadQuestionPapers = async () => {
+    const fetchSheetData = async () => {
       try {
         setLoading(true);
-        
-        // Load question papers from JSON files
-        const modules = import.meta.glob('../../content/question-papers/*.json');
-        const papersData: QuestionPaper[] = [];
-
-        for (const path in modules) {
-          try {
-            const module = await modules[path]() as { default: QuestionPaper };
-            papersData.push(module.default);
-          } catch (err) {
-            console.warn(`Failed to load question paper from ${path}:`, err);
-          }
-        }
-
-        setQuestionPapers(papersData);
+        const res = await fetch(SHEET_CSV_URL);
+        const csv = await res.text();
+        const parsed = parseCSV(csv);
+        setPapers(parsed);
       } catch (err) {
-        console.error('Error loading question papers:', err);
+        console.error("❌ Failed to load question papers from Google Sheets:", err);
       } finally {
         setLoading(false);
       }
     };
-
-    loadQuestionPapers();
+    fetchSheetData();
   }, []);
 
-  // Get unique departments and years from data
-  const departments = ["All", ...new Set(questionPapers.map(paper => paper.department))];
-  const years = ["All", ...new Set(questionPapers.map(paper => paper.year).sort((a, b) => b.localeCompare(a)))];
+  const departments = ["All", ...new Set(papers.map((p) => p.department))];
+  const years = ["All", ...new Set(papers.map((p) => p.year).sort((a, b) => b.localeCompare(a)))];
 
-  const filteredPapers = questionPapers.filter((paper) => {
-    const deptMatch = selectedDept === "all" || paper.department === selectedDept;
-    const yearMatch = selectedYear === "all" || paper.year === selectedYear;
+  const filteredPapers = papers.filter((p) => {
+    const deptMatch = selectedDept === "all" || p.department === selectedDept;
+    const yearMatch = selectedYear === "all" || p.year === selectedYear;
     return deptMatch && yearMatch;
   });
 
   const handleDownload = (fileUrl: string, title: string) => {
-    // Create a temporary link to trigger download
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = fileUrl;
     link.download = `${title}.pdf`;
     document.body.appendChild(link);
@@ -70,75 +66,12 @@ const QuestionPapers = () => {
     document.body.removeChild(link);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Navigation />
-
-        <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            {/* Header Loading */}
-            <div className="text-center mb-12">
-              <div className="inline-flex p-4 rounded-2xl bg-gray-300 mb-6 animate-pulse">
-                <FileText className="h-12 w-12 text-gray-400" />
-              </div>
-              <div className="h-10 bg-gray-300 rounded w-64 mx-auto mb-4 animate-pulse"></div>
-              <div className="h-4 bg-gray-300 rounded w-96 mx-auto animate-pulse"></div>
-            </div>
-
-            {/* Filters Loading */}
-            <div className="p-6 rounded-2xl bg-gray-300 mb-8 animate-pulse">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <div className="h-4 bg-gray-400 rounded w-24 mb-2"></div>
-                  <div className="h-10 bg-gray-400 rounded"></div>
-                </div>
-                <div className="flex-1">
-                  <div className="h-4 bg-gray-400 rounded w-16 mb-2"></div>
-                  <div className="h-10 bg-gray-400 rounded"></div>
-                </div>
-                <div className="w-32 h-10 bg-gray-400 rounded"></div>
-              </div>
-            </div>
-
-            {/* Papers Loading */}
-            <div className="mb-6">
-              <div className="h-8 bg-gray-300 rounded w-48 animate-pulse"></div>
-            </div>
-
-            <div className="grid gap-4">
-              {[1, 2, 3, 4, 5].map((item) => (
-                <div key={item} className="p-6 rounded-2xl bg-gray-300 animate-pulse">
-                  <div className="flex gap-4">
-                    <div className="w-16 h-20 bg-gray-400 rounded-lg"></div>
-                    <div className="flex-1">
-                      <div className="h-6 bg-gray-400 rounded w-3/4 mb-3"></div>
-                      <div className="flex gap-2">
-                        <div className="w-20 h-6 bg-gray-400 rounded-full"></div>
-                        <div className="w-24 h-6 bg-gray-400 rounded-full"></div>
-                        <div className="w-16 h-6 bg-gray-400 rounded-full"></div>
-                        <div className="w-28 h-6 bg-gray-400 rounded-full"></div>
-                      </div>
-                    </div>
-                    <div className="w-32 h-10 bg-gray-400 rounded"></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
 
       <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
           <div className="text-center mb-12 animate-fade-in-up">
             <div className="inline-flex p-4 rounded-2xl bg-gradient-to-br from-primary to-accent mb-6">
               <FileText className="h-12 w-12 text-white" />
@@ -156,11 +89,11 @@ const QuestionPapers = () => {
                 <label className="text-sm font-medium">Department</label>
                 <Select value={selectedDept} onValueChange={setSelectedDept}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="All Departments" />
                   </SelectTrigger>
                   <SelectContent>
                     {departments.map((dept) => (
-                      <SelectItem key={dept} value={dept.toLowerCase()}>
+                      <SelectItem key={dept} value={dept === "All" ? "all" : dept}>
                         {dept}
                       </SelectItem>
                     ))}
@@ -172,11 +105,11 @@ const QuestionPapers = () => {
                 <label className="text-sm font-medium">Year</label>
                 <Select value={selectedYear} onValueChange={setSelectedYear}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="All Years" />
                   </SelectTrigger>
                   <SelectContent>
                     {years.map((year) => (
-                      <SelectItem key={year} value={year.toLowerCase()}>
+                      <SelectItem key={year} value={year === "All" ? "all" : year}>
                         {year}
                       </SelectItem>
                     ))}
@@ -191,33 +124,31 @@ const QuestionPapers = () => {
             </div>
           </GlassCard>
 
-          {/* Results Count */}
+          {/* Results */}
           <div className="mb-6">
             <h2 className="text-2xl font-semibold">
               Available Papers ({filteredPapers.length})
             </h2>
           </div>
 
-          {/* Question Papers Grid */}
-          {filteredPapers.length === 0 ? (
+          {loading ? (
+            <p>Loading question papers...</p>
+          ) : filteredPapers.length === 0 ? (
             <GlassCard className="text-center py-12">
               <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-semibold mb-2">No Question Papers Found</h3>
               <p className="text-muted-foreground">
-                {questionPapers.length === 0 
-                  ? "Question papers will appear here once added through the CMS."
-                  : "No papers found for the selected filters."
-                }
+                No question papers found for the selected filters.
               </p>
             </GlassCard>
           ) : (
             <div className="grid gap-4">
-              {filteredPapers.map((paper, index) => (
+              {filteredPapers.map((paper, i) => (
                 <GlassCard
-                  key={index}
+                  key={i}
                   hover
                   className="animate-fade-in-up"
-                  style={{ animationDelay: `${index * 0.1}s` }}
+                  style={{ animationDelay: `${i * 0.1}s` }}
                 >
                   <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                     <div className="flex gap-4 flex-1">
@@ -244,7 +175,7 @@ const QuestionPapers = () => {
                         </div>
                       </div>
                     </div>
-                    <Button 
+                    <Button
                       className="gap-2 flex-shrink-0"
                       onClick={() => handleDownload(paper.file, paper.title)}
                     >
@@ -256,17 +187,6 @@ const QuestionPapers = () => {
               ))}
             </div>
           )}
-
-          {/* Information Note */}
-          <GlassCard className="mt-12 bg-gradient-to-br from-primary/5 to-accent/5">
-            <div className="text-center space-y-4">
-              <h2 className="text-2xl font-bold">Note</h2>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Question papers are provided for reference and study purposes only. 
-                All papers are subject to copyright and should not be redistributed without permission.
-              </p>
-            </div>
-          </GlassCard>
         </div>
       </div>
 
@@ -274,5 +194,24 @@ const QuestionPapers = () => {
     </div>
   );
 };
+
+// Simple CSV parser (safe for Google Sheets exports)
+function parseCSV(csvText: string): QuestionPaper[] {
+  const lines = csvText.split("\n").filter((l) => l.trim());
+  const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
+  return lines.slice(1).map((line) => {
+    const values = line.split(",").map((v) => v.trim());
+    const obj: any = {};
+    headers.forEach((h, i) => (obj[h] = values[i] || ""));
+    return {
+      title: obj["title"] || "Untitled",
+      department: obj["department"] || "Unknown",
+      semester: obj["semester"] || "",
+      year: obj["year"] || "",
+      type: obj["type"] || "",
+      file: obj["file"] || ""
+    };
+  });
+}
 
 export default QuestionPapers;
