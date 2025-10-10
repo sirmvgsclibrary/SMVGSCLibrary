@@ -144,13 +144,13 @@ const Contact = () => {
                     <>
                       Main: {contactInfo.phone}<br />
                       {contactInfo.libraryPhone && `Library: ${contactInfo.libraryPhone}`}<br />
-                      Mon - Fri: 8 AM - 6 PM
+                      Mon - Fri: 10 AM - 4 PM
                     </>
                   ) : (
                     <>
                       Main: +91-XXX-XXX-XXXX<br />
                       Library: +91-XXX-XXX-YYYY<br />
-                      Mon - Fri: 8 AM - 6 PM
+                      Mon - Fri: 10 AM - 4 PM
                     </>
                   )}
                 </p>
@@ -196,13 +196,13 @@ const Contact = () => {
                         {libraryHours?.weekday?.days || "Monday - Friday"}
                       </span>
                       <span className="text-muted-foreground">
-                        {libraryHours?.weekday?.hours || "8:00 AM - 8:00 PM"}
+                        {libraryHours?.weekday?.hours || "10:00 AM - 4:00 PM"}
                       </span>
                     </div>
                     <div className="flex justify-between items-center pb-2 border-b border-border/50">
                       <span className="font-medium">Saturday</span>
                       <span className="text-muted-foreground">
-                        {libraryHours?.saturday?.hours || "9:00 AM - 5:00 PM"}
+                        {libraryHours?.saturday?.hours || "10:00 AM - 2:00 PM"}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
