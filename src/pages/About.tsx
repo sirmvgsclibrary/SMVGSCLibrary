@@ -1,4 +1,4 @@
-import { Building2, BookOpen, Code2, Users, Eye } from "lucide-react";
+import { Building2, BookOpen, Code2, Users } from "lucide-react";
 import GlassCard from "@/components/GlassCard";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -11,6 +11,7 @@ interface PageData {
   title: string;
   body: string;
   image: string;
+  images?: string[]; // Add support for multiple images
   statistics?: {
     books: string;
     journals: string;
@@ -37,8 +38,7 @@ const About = () => {
   const [aboutLibrary, setAboutLibrary] = useState<PageData | null>(null);
   const [aboutWebsite, setAboutWebsite] = useState<AboutWebsiteData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [visitorCount, setVisitorCount] = useState<number | null>(null);
-  const [visitorLoading, setVisitorLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     const loadAboutData = async () => {
@@ -78,48 +78,43 @@ const About = () => {
     loadAboutData();
   }, []);
 
-  // ✅ SIMPLE VISITOR COUNTER - Works everywhere
+  // Auto-slide effect for library images
   useEffect(() => {
-    const trackWebsiteVisit = () => {
-      try {
-        setVisitorLoading(true);
-        
-        // Use a unique key for this deployment
-        const storageKey = 'mvgsc_website_visitors_v2';
-        const sessionKey = 'mvgsc_visit_counted_v2';
-        
-        const storedCount = localStorage.getItem(storageKey);
-        let currentCount = storedCount ? parseInt(storedCount) : 0;
-        
-        const hasCounted = sessionStorage.getItem(sessionKey);
-        
-        if (!hasCounted) {
-          currentCount += 1;
-          localStorage.setItem(storageKey, currentCount.toString());
-          sessionStorage.setItem(sessionKey, 'true');
-          
-          console.log(`Visitor count updated: ${currentCount}`);
-        }
-        
-        setVisitorCount(currentCount);
-        
-      } catch (error) {
-        console.error('Visitor counter error:', error);
-        setVisitorCount(1); // Default to 1 if there's an error
-      } finally {
-        setVisitorLoading(false);
-      }
-    };
+    if (!aboutLibrary?.images || aboutLibrary.images.length <= 1) return;
 
-    // Add a small delay to ensure component is mounted
-    const timer = setTimeout(trackWebsiteVisit, 100);
-    return () => clearTimeout(timer);
-  }, []);
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === (aboutLibrary.images!.length - 1) ? 0 : prevIndex + 1
+      );
+    }, 3000);
 
-  // Format number with commas
-  const formatNumber = (num: number) => {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return () => clearInterval(interval);
+  }, [aboutLibrary?.images]);
+
+  const goToSlide = (index: number) => {
+    setCurrentImageIndex(index);
   };
+
+  const nextSlide = () => {
+    if (!aboutLibrary?.images) return;
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === (aboutLibrary.images.length - 1) ? 0 : prevIndex + 1
+    );
+  };
+
+  const prevSlide = () => {
+    if (!aboutLibrary?.images) return;
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? (aboutLibrary.images.length - 1) : prevIndex - 1
+    );
+  };
+
+  // Get current images array - use images if available, otherwise fall back to single image
+  const libraryImages = aboutLibrary?.images && aboutLibrary.images.length > 0 
+    ? aboutLibrary.images 
+    : aboutLibrary?.image 
+      ? [aboutLibrary.image] 
+      : [libraryImage];
 
   if (loading) {
     return (
@@ -171,24 +166,24 @@ const About = () => {
                   {aboutCollege?.body ? (
                     <div className="prose prose-lg max-w-none">
                       {aboutCollege.body.split('\n').map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
+                        <p key={index} className="font-medium">{paragraph}</p>
                       ))}
                     </div>
                   ) : (
                     <>
-                      <p>
+                      <p className="font-medium">
                         Sir M. Visvesvaraya Government Science College stands as a testament to academic 
                         excellence and innovation in higher education. Established with a vision to nurture 
                         scientific temperament and foster research, our institution has been at the forefront 
                         of quality education for decades.
                       </p>
-                      <p>
+                      <p className="font-medium">
                         Named after the legendary engineer and statesman Sir M. Visvesvaraya, our college 
                         embodies his principles of precision, dedication, and service to society. We offer 
                         comprehensive programs across various scientific disciplines including Physics, Chemistry, 
                         Mathematics, Computer Science, and Life Sciences.
                       </p>
-                      <p>
+                      <p className="font-medium">
                         With state-of-the-art laboratories, experienced faculty, and a commitment to holistic 
                         development, we prepare students to become leaders and innovators in their chosen fields.
                       </p>
@@ -223,19 +218,68 @@ const About = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="order-2 lg:order-1 relative animate-fade-in">
                 <div className="absolute -inset-4 bg-gradient-to-r from-accent/20 to-primary/20 rounded-2xl blur-2xl" />
-                {aboutLibrary?.image ? (
-                  <img
-                    src={aboutLibrary.image}
-                    alt="Library Interior"
-                    className="relative rounded-2xl shadow-2xl w-full h-auto"
-                  />
-                ) : (
-                  <img
-                    src={libraryImage}
-                    alt="Library Interior"
-                    className="relative rounded-2xl shadow-2xl w-full h-auto"
-                  />
-                )}
+                
+                {/* Image Carousel */}
+                <div className="relative rounded-2xl shadow-2xl overflow-hidden">
+                  <div className="relative aspect-[4/3]">
+                    {libraryImages.map((image, index) => (
+                      <div
+                        key={index}
+                        className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${
+                          index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                        }`}
+                      >
+                        <img
+                          src={image}
+                          alt={`Library Interior ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Navigation Arrows */}
+                  {libraryImages.length > 1 && (
+                    <>
+                      <button
+                        onClick={prevSlide}
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all duration-300 backdrop-blur-sm"
+                        aria-label="Previous image"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={nextSlide}
+                        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-all duration-300 backdrop-blur-sm"
+                        aria-label="Next image"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+
+                  {/* Dot Indicators */}
+                  {libraryImages.length > 1 && (
+                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                      {libraryImages.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => goToSlide(index)}
+                          className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                            index === currentImageIndex
+                              ? 'bg-white scale-125'
+                              : 'bg-white/50 hover:bg-white/80'
+                          }`}
+                          aria-label={`Go to slide ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="order-1 lg:order-2 space-y-6 animate-fade-in-up">
@@ -281,18 +325,6 @@ const About = () => {
                         {aboutLibrary?.statistics?.books || "50,000+"}
                       </div>
                       <div className="text-muted-foreground">Books</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold gradient-text">
-                        {aboutLibrary?.statistics?.journals || "200+"}
-                      </div>
-                      <div className="text-muted-foreground">Journals</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold gradient-text">
-                        {aboutLibrary?.statistics?.seats || "100+"}
-                      </div>
-                      <div className="text-muted-foreground">Seats</div>
                     </div>
                     <div>
                       <div className="text-2xl font-bold gradient-text">
@@ -380,45 +412,6 @@ const About = () => {
                 </div>
               </GlassCard>
             </div>
-
-            {/* ✅ VISITOR COUNTER - Updated Version */}
-            <GlassCard className="mb-12 bg-gradient-to-br from-primary/5 to-accent/5 animate-fade-in-up">
-              <div className="text-center space-y-4">
-                <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-primary to-accent">
-                  <Eye className="h-6 w-6 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold">Website Visitors</h3>
-                <div className="flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-4xl font-bold gradient-text mb-2 min-h-[48px] flex items-center justify-center">
-                      {visitorLoading ? (
-                        <div className="flex items-center gap-2">
-                          <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                          <span className="text-sm text-muted-foreground">Loading...</span>
-                        </div>
-                      ) : visitorCount !== null ? (
-                        formatNumber(visitorCount)
-                      ) : (
-                        "0"
-                      )}
-                    </div>
-                    <p className="text-muted-foreground font-medium">Total Unique Visitors</p>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  {visitorCount !== null && visitorCount > 0
-                    ? `You are visitor #${formatNumber(visitorCount)} to our digital library`
-                    : "Welcome to our digital library! 🎉"
-                  }
-                </p>
-                <div className="text-xs text-muted-foreground pt-2 border-t border-border/30">
-                  {visitorCount === 0 
-                    ? "Refresh to become visitor #1!"
-                    : "Counts each website visitor only once"
-                  }
-                </div>
-              </div>
-            </GlassCard>
 
             {/* Technologies */}
             <GlassCard className="bg-gradient-to-br from-primary/5 to-accent/5">

@@ -1,6 +1,9 @@
 // src/lib/google-sheets.ts
 
-// --- 📘 BOOKS SHEET (OPAC) CONFIG ---
+// ============================================================================
+// 📘 BOOKS SECTION (OPAC)
+// ============================================================================
+
 const SHEET_CSV_URL =
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vTwYoiETHqEVR5ZOXsKXk1WNQ46XlvHpje-lbxXekdnrOA9U2IMTpVFoNmOi9KuX8saKYO7vr_lWatM/pub?gid=1315133597&single=true&output=csv';
 
@@ -31,7 +34,7 @@ export const fetchBooksFromSheets = async (
     }
 
     const csvText = await response.text();
-    const books = parseCSV(csvText);
+    const books = parseBookCSV(csvText);
 
     console.log(`✅ Successfully parsed ${books.length} books`);
 
@@ -64,7 +67,7 @@ export const fetchBooksFromSheets = async (
 };
 
 // --- CSV PARSER FOR BOOKS ---
-const parseCSV = (csvText: string): Book[] => {
+const parseBookCSV = (csvText: string): Book[] => {
   const lines = csvText.split('\n').filter((line) => line.trim());
   if (lines.length <= 4) return [];
 
@@ -116,11 +119,11 @@ const parseCSVLine = (line: string): string[] => {
 };
 
 // ============================================================================
-// 🧾 QUESTION PAPERS SECTION (New)
+// 🧾 QUESTION PAPERS SECTION
 // ============================================================================
 
 const QUESTION_PAPERS_SHEET_URL =
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtjRMgUQ55lAJxPqb4XKCV2ftLhnbccWwy-Oe3gs8Px9CQKou4ZNbTcTITFQAzr9bnbbtPZMXUclU2/pub?gid=716050975&single=true&output=csv'; // <-- Replace with your actual published link
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vRtjRMgUQ55lAJxPqb4XKCV2ftLhnbccWwy-Oe3gs8Px9CQKou4ZNbTcTITFQAzr9bnbbtPZMXUclU2/pub?gid=716050975&single=true&output=csv';
 
 export interface QuestionPaper {
   title: string;
@@ -166,6 +169,60 @@ const parseQuestionPaperCSV = (csvText: string): QuestionPaper[] => {
       year: paper['year'] || '',
       type: paper['type'] || '',
       file: paper['file'] || '',
+    };
+  });
+};
+
+// ============================================================================
+// 🌐 E-RESOURCES SECTION
+// ============================================================================
+
+const E_RESOURCES_SHEET_URL =
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vRrXXXXX/pub?gid=0&single=true&output=csv'; 
+// ⬆️ Replace this link with your published E-Resources CSV link
+
+export interface EResource {
+  title: string;
+  category: string;
+  description: string;
+  link: string;
+  accessType: string;
+}
+
+export const fetchEResourcesFromSheets = async (): Promise<EResource[]> => {
+  try {
+    console.log('🌐 Fetching E-Resources from Google Sheets...');
+    const response = await fetch(E_RESOURCES_SHEET_URL);
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch e-resources: ${response.status} ${response.statusText}`);
+    }
+
+    const csvText = await response.text();
+    const resources = parseEResourceCSV(csvText);
+    console.log(`✅ Loaded ${resources.length} e-resources`);
+    return resources;
+  } catch (error) {
+    console.error('❌ Error fetching e-resources:', error);
+    return [];
+  }
+};
+
+const parseEResourceCSV = (csvText: string): EResource[] => {
+  const lines = csvText.split('\n').filter((line) => line.trim());
+  const headers = lines[0].split(',').map((h) => h.trim());
+
+  return lines.slice(1).map((line) => {
+    const values = line.split(',');
+    const row: any = {};
+    headers.forEach((header, i) => (row[header] = values[i] || ''));
+
+    return {
+      title: row['title'] || 'Untitled Resource',
+      category: row['category'] || 'General',
+      description: row['description'] || '',
+      link: row['link'] || '',
+      accessType: row['accessType'] || 'Free',
     };
   });
 };

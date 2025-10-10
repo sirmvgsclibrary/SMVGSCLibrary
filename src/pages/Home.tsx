@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import GlassCard from "@/components/GlassCard";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import collegeImage from "@/assets/college-building.jpg";
+import collegeImage from "@/assets/college.jpg";
 import libraryImage from "@/assets/library-interior.jpg";
 import { useEffect, useState } from "react";
 
