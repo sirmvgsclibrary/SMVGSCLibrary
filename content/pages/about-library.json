@@ -2,6 +2,10 @@
   "title": "About the Library",
   "body": "The MVGSC Library serves as the intellectual hub of our institution, housing an extensive collection of over 20,000+ books, journals, and digital resources. Our library is designed to support both academic excellence and personal intellectual growth.\n\nWith dedicated reading hall, digital resource center, and collaborative study spaces, we provide an environment conducive to learning and research. Our collection spans across all scientific disciplines, complemented by access to international journals and databases.\n\nThe library is staffed by experienced professionals who are committed to assisting students and faculty in their academic pursuits. We continuously update our collection and services to meet the evolving needs of our academic community.",
   "image": "/assets/sirmvlibrary.jpeg",
+  "images": [
+    "@/assets/sirmvlibrary.jpeg",
+    "@/assets/sirmvcollege.jpeg"
+  ],
   "statistics": {
     "books": "20,000+",
     "journals": "200+",
