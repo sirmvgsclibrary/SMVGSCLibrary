@@ -397,10 +397,11 @@ const Home = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div className="relative">
+              <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl blur-2xl" />
               <img
                 src={collegeImage}
-                alt="College Building"
-                className="rounded-2xl shadow-2xl w-full h-auto"
+                alt="Sir MV Government Science College Building"
+                className="relative rounded-2xl shadow-2xl w-full h-auto"
               />
             </div>
 
