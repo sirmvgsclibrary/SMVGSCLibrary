@@ -427,11 +427,11 @@ const About = () => {
                         <>
                           <div className="space-y-1">
                             <div className="font-medium text-sm lg:text-base">Dr. Shoaib Ahammed</div>
-                            <div className="text-xs lg:text-sm text-muted-foreground">Project Supervisor</div>
+                            <div className="text-xs lg:text-sm text-muted-foreground"></div>
                           </div>
                           <div className="space-y-1">
-                            <div className="font-medium text-sm lg:text-base">Manjunath H R</div>
-                            <div className="text-xs lg:text-sm text-muted-foreground">Head of Department, BCA</div>
+                            <div className="font-medium text-sm lg:text-base">Manjunath H R </div>
+                            <div className="text-xs lg:text-sm text-muted-foreground">[H O D] Department of Computer Science</div>
                           </div>
                         </>
                       )}
