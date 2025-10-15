@@ -109,12 +109,12 @@ const Footer = () => {
           <p className="mt-2">
             Developed by{" "}
             <a
-              href="https://codersclub.netlify.app"
+              href="https://hash2code.netlify.app"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:underline"
             >
-              The Coders Club
+              #2Code
             </a>
           </p>
         </div>
