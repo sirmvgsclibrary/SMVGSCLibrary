@@ -4,7 +4,7 @@
   "supervisors": [
     {
       "name": "Manjunath H R Sir",
-      "role": "Head of Department, BCA"
+      "role": "[H O D] Department of computer science"
     },
     {
       "name": "Dr. Shoaib Ahammed",
@@ -12,7 +12,7 @@
     }
   ],
   "team": {
-    "name": "The Coders Club",
-    "url": "https://codersclub.netlify.app"
+    "name": "#2Code",
+    "url": "https://hash2code.netlify.app"
   }
 }
