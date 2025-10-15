@@ -450,13 +450,13 @@ const About = () => {
                       This website was designed and developed by 
                     </p>
                     <a
-                      href={aboutWebsite?.team?.url || "https://codersclub.netlify.app"}
+                      href={aboutWebsite?.team?.url || "https://hash2code.netlify.app"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-accent text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105 text-sm lg:text-base"
                     >
                       <span className="font-medium">
-                        {aboutWebsite?.team?.name || "The Coders Club"}
+                        {aboutWebsite?.team?.name || "#2Code"}
                       </span>
                       <span className="text-xs opacity-90">↗</span>
                     </a>
