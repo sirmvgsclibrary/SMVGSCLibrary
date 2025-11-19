@@ -125,35 +125,42 @@ const Staff = () => {
                     </div>
 
                     {/* Text */}
-                    <div className="flex flex-col justify-center flex-1 gap-2">
-                      <h3 className="text-xl font-semibold text-foreground">{member.name}</h3>
+                    <div className="flex flex-col justify-center flex-1 gap-2 max-w-full">
+                      <h3 className="text-xl font-semibold text-foreground break-words">
+                        {member.name}
+                      </h3>
 
-                      <p className="text-primary font-medium text-sm uppercase tracking-wide">
+                      <p className="text-primary font-medium text-sm uppercase tracking-wide break-words">
                         {member.position}
                       </p>
 
                       {/* Contact Rows */}
-                      <div className="space-y-3 mt-2">
+                      <div className="space-y-3 mt-2 max-w-full">
+
+                        {/* EMAIL — fixed overflow */}
                         <div className="flex items-center gap-3 bg-muted/50 rounded-xl p-3">
                           <Mail className="h-4 w-4 text-primary" />
                           <a
                             href={`mailto:${member.email}`}
-                            className="text-muted-foreground hover:text-foreground font-medium truncate"
-                            title={member.email}
+                            className="text-muted-foreground hover:text-foreground font-medium 
+                            break-all whitespace-normal max-w-full"
                           >
                             {member.email}
                           </a>
                         </div>
 
+                        {/* PHONE */}
                         <div className="flex items-center gap-3 bg-muted/50 rounded-xl p-3">
                           <Phone className="h-4 w-4 text-primary" />
                           <a
                             href={`tel:${member.phone}`}
-                            className="text-muted-foreground hover:text-foreground font-medium"
+                            className="text-muted-foreground hover:text-foreground font-medium 
+                            break-all"
                           >
                             {member.phone}
                           </a>
                         </div>
+
                       </div>
                     </div>
                   </div>
@@ -168,6 +175,7 @@ const Staff = () => {
               <div className="inline-flex p-4 rounded-2xl bg-primary shadow-elegant">
                 <Users className="h-8 w-8 text-primary-foreground" />
               </div>
+
               <h2 className="text-3xl font-bold text-foreground">Library Hours</h2>
 
               <div className="max-w-md mx-auto space-y-4 bg-card/50 rounded-2xl p-6 border border-border/20">
