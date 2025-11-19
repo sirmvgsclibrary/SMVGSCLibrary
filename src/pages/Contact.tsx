@@ -148,8 +148,7 @@ const Contact = () => {
                     </>
                   ) : (
                     <>
-                      Main: +91-XXX-XXX-XXXX<br />
-                      Library: +91-XXX-XXX-YYYY<br />
+                      Library: +917892468482<br />
                       Mon - Fri: 10 AM - 4 PM
                     </>
                   )}
@@ -169,7 +168,6 @@ const Contact = () => {
                     <>
                       General: {contactInfo.email}<br />
                       {contactInfo.libraryEmail && `Library: ${contactInfo.libraryEmail}`}<br />
-                      We reply within 24 hours
                     </>
                   ) : (
                     <>
