@@ -17,6 +17,7 @@ import { fetchBooksFromSheets, Book } from "@/lib/google-sheets";
 
 const OPAC = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState(searchQuery);
   const [searchType, setSearchType] = useState("all");
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(false);
@@ -26,79 +27,13 @@ const OPAC = () => {
   const [initialLoad, setInitialLoad] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const performSearch = useCallback(
-    async (newSearch: boolean = true) => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const currentPage = newSearch ? 1 : page;
-        const result = await fetchBooksFromSheets(searchQuery, currentPage, 20);
-
-        console.log(`📚 Search results - Page: ${currentPage}, New Search: ${newSearch}`, {
-          booksCount: result.books.length,
-          hasMore: result.hasMore,
-          total: result.total
-        });
-
-        if (newSearch) {
-          setBooks(result.books);
-          setPage(1);
-        } else {
-          // For load more, append new books to existing list
-          setBooks((prev) => {
-            const newBooks = [...prev, ...result.books];
-            console.log(`🔄 Appending books: ${prev.length} -> ${newBooks.length}`);
-            return newBooks;
-          });
-        }
-
-        setHasMore(result.hasMore);
-        setTotalBooks(result.total);
-        setInitialLoad(false);
-      } catch (error) {
-        console.error("❌ Search error:", error);
-        setError("Failed to load books. Please try again later.");
-        if (newSearch) {
-          setBooks([]);
-        }
-      } finally {
-        setLoading(false);
-      }
-    },
-    [searchQuery, page]
-  );
-
-  const handleLoadMore = () => {
-    if (hasMore && !loading) {
-      console.log(`⬇️ Loading more books... Current page: ${page}, Going to page: ${page + 1}`);
-      setPage(prevPage => {
-        const nextPage = prevPage + 1;
-        console.log(`📄 Page updated: ${prevPage} -> ${nextPage}`);
-        return nextPage;
-      });
-    }
-  };
-
-  // Load more when page changes
+  // Debounce the user's typing so we don't trigger searches on every keystroke
   useEffect(() => {
-    if (page > 1 && !initialLoad) {
-      console.log(`🎯 Page changed to ${page}, triggering load more...`);
-      performSearch(false);
-    }
-  }, [page]);
-
-  // Initial load and search
-  useEffect(() => {
-    setPage(1);
-    performSearch(true);
+    const t = setTimeout(() => setDebouncedQuery(searchQuery), 350);
+    return () => clearTimeout(t);
   }, [searchQuery]);
 
-  // Initial page load
-  useEffect(() => {
-    performSearch(true);
-  }, []);
-
+  // Helper to get language name
   const getLanguageName = (code: string) => {
     const languages: Record<string, string> = {
       KAN: "Kannada",
@@ -110,6 +45,133 @@ const OPAC = () => {
       MAL: "Malayalam",
     };
     return languages[code] || code;
+  };
+
+  // Client-side case-insensitive matcher as a safety net (works within the fetched page)
+  const matchesQuery = (book: Book, query: string, type: string) => {
+    if (!query) return true;
+    const q = query.trim().toLowerCase();
+
+    const title = (book.title || "").toLowerCase();
+    const author = (book.author || "").toLowerCase();
+    const language = (book.language || "").toLowerCase();
+    const department = (book.department || "").toLowerCase();
+    const location = (book.location || "").toLowerCase();
+    const year = String(book.year || "").toLowerCase();
+    const id = String(book.id || "").toLowerCase();
+
+    switch (type) {
+      case "title":
+        return title.includes(q);
+      case "author":
+        return author.includes(q);
+      case "language":
+        return language.includes(q) || getLanguageName(book.language).toLowerCase().includes(q);
+      case "department":
+        return department.includes(q);
+      case "all":
+      default:
+        return (
+          title.includes(q) ||
+          author.includes(q) ||
+          language.includes(q) ||
+          department.includes(q) ||
+          location.includes(q) ||
+          year.includes(q) ||
+          id.includes(q)
+        );
+    }
+  };
+
+  /**
+   * performSearch
+   * - newSearch: whether to reset page and replace books
+   * - explicitQuery: the query to use (so we use the debouncedQuery snapshot)
+   */
+  const performSearch = useCallback(
+    async (newSearch: boolean = true, explicitQuery: string = "") => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const normalizedQuery = explicitQuery.trim();
+        const currentPage = newSearch ? 1 : page;
+
+        console.log(
+          `📚 performSearch called — newSearch:${newSearch} page:${currentPage} query:"${normalizedQuery}" type:${searchType}`
+        );
+
+        // Call the existing fetch function. We pass the normalized query (so if your backend
+        // supports case-insensitive search this will help). We keep the same arg count assuming
+        // fetchBooksFromSheets(searchQuery, page, pageSize).
+        const result = await fetchBooksFromSheets(normalizedQuery, currentPage, 20);
+
+        console.log(`📥 Fetched ${result.books.length} books (server reported total: ${result.total})`);
+
+        // Apply client-side, case-insensitive filtering as a fallback to guarantee matches
+        const filtered = result.books.filter((b) => matchesQuery(b, normalizedQuery, searchType));
+
+        if (newSearch) {
+          setBooks(filtered);
+          setPage(1);
+        } else {
+          setBooks((prev) => {
+            // Append filtered results
+            const newBooks = [...prev, ...filtered];
+            console.log(`🔄 Appending books: ${prev.length} -> ${newBooks.length}`);
+            return newBooks;
+          });
+        }
+
+        // If server uses different notion of hasMore/total, we still keep it as returned
+        // but note: filtered length could be less than returned page size.
+        setHasMore(result.hasMore);
+        setTotalBooks(result.total);
+        setInitialLoad(false);
+      } catch (err) {
+        console.error("❌ Search error:", err);
+        setError("Failed to load books. Please try again later.");
+        if (newSearch) {
+          setBooks([]);
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    // dependencies: page & searchType are read inside the function
+    [page, searchType]
+  );
+
+  // When debouncedQuery or searchType changes, run a new search (reset)
+  useEffect(() => {
+    setPage(1);
+    performSearch(true, debouncedQuery);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedQuery, searchType]);
+
+  // When page changes (for load more), trigger fetch for that page
+  useEffect(() => {
+    if (page > 1 && !initialLoad) {
+      console.log(`🎯 Page changed to ${page}, triggering load more...`);
+      performSearch(false, debouncedQuery);
+    }
+  }, [page]); // intentionally not including performSearch to avoid re-creating it on every render
+
+  // Initial load (only once)
+  useEffect(() => {
+    performSearch(true, debouncedQuery);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleLoadMore = () => {
+    if (hasMore && !loading) {
+      console.log(`⬇️ Loading more books... Current page: ${page}, Going to page: ${page + 1}`);
+      setPage((prevPage) => {
+        const nextPage = prevPage + 1;
+        console.log(`📄 Page updated: ${prevPage} -> ${nextPage}`);
+        return nextPage;
+      });
+    }
   };
 
   return (
