@@ -53,7 +53,7 @@ const Staff = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      {/* ✨ FIXED HEADER SECTION WITH BACKGROUND IMAGE (Same as OPAC) */}
+      {/* Header Section */}
       <header className="relative isolate overflow-hidden">
         <div
           className="absolute inset-0 -z-10 bg-cover bg-center opacity-20"
@@ -75,11 +75,13 @@ const Staff = () => {
         </div>
       </header>
 
-      {/* ✅ Main Section */}
+      {/* Main Section */}
       <main className="pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {loading ? (
-            <div className="text-center py-20 text-muted-foreground text-lg">Loading staff data...</div>
+            <div className="text-center py-20 text-muted-foreground text-lg">
+              Loading staff data...
+            </div>
           ) : staff.length === 0 ? (
             <GlassCard className="text-center py-20 max-w-2xl mx-auto">
               <div className="inline-flex p-6 rounded-2xl bg-muted/50 mb-6">
@@ -98,87 +100,81 @@ const Staff = () => {
                 <GlassCard
                   key={index}
                   hover
-                  className="animate-fade-in-up group relative overflow-hidden border-border/50 hover:border-primary/20 transition-all duration-500 hover-lift"
+                  className="animate-fade-in-up group relative overflow-hidden border-border/40 hover:border-primary/30 transition-all duration-500 hover-lift"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
-                  <div className="relative z-10">
-                    <div className="flex flex-col items-center text-center gap-6 p-2">
-                      {/* Avatar */}
-                      <div className="relative group/avatar">
-                        {member.photo ? (
-                          <div className="relative">
-                            <img
-                              loading="lazy"
-                              src={member.photo}
-                              alt={member.name}
-                              className="w-24 h-24 rounded-2xl object-cover shadow-lg border-4 border-background group-hover/avatar:border-primary/20 transition-all duration-500"
-                            />
-                            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-500" />
-                          </div>
-                        ) : (
-                          <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg group-hover/avatar:shadow-elegant transition-all duration-500">
-                            <span className="text-2xl font-bold text-primary-foreground">
-                              {getInitials(member.name)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
 
-                      {/* Details */}
-                      <div className="space-y-4 flex-1 w-full">
-                        <div className="space-y-3">
-                          <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-500 leading-tight">
-                            {member.name}
-                          </h3>
-                          <div className="space-y-2">
-                            <p className="text-primary font-semibold text-sm uppercase tracking-wider">
-                              {member.position}
-                            </p>
-                            <p className="text-sm text-muted-foreground font-medium bg-muted/50 rounded-lg py-1 px-3 inline-block">
-                              {member.department}
-                            </p>
+                  <div className="relative z-10 flex gap-6 p-6 items-center">
+                    
+                    {/* LEFT SIDE — Image */}
+                    <div className="flex-shrink-0">
+                      {member.photo ? (
+                        <div className="relative">
+                          <img
+                            loading="lazy"
+                            src={member.photo}
+                            alt={member.name}
+                            className="object-cover rounded-xl shadow-lg border border-border/40"
+                            style={{ width: "100px", height: "128px" }}
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          className="rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg"
+                          style={{ width: "100px", height: "128px" }}
+                        >
+                          <span className="text-2xl font-bold text-primary-foreground">
+                            {getInitials(member.name)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* RIGHT SIDE — DETAILS */}
+                    <div className="flex flex-col justify-center flex-1 gap-3">
+
+                      <h3 className="text-xl font-semibold text-foreground leading-tight">
+                        {member.name}
+                      </h3>
+
+                      <p className="text-primary font-semibold text-sm uppercase tracking-wider">
+                        {member.position}
+                      </p>
+
+                      {/* CONTACTS */}
+                      <div className="space-y-3 pt-1">
+
+                        {/* Email */}
+                        <div className="flex items-center gap-3 bg-muted/50 rounded-xl p-3 group/email transition-all duration-500">
+                          <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover/email:bg-primary group-hover/email:text-primary-foreground transition-all duration-500">
+                            <Mail className="h-4 w-4" />
                           </div>
-                          {member.bio && (
-                            <p className="text-sm text-muted-foreground leading-relaxed pt-3 border-t border-border/30">
-                              {member.bio}
-                            </p>
-                          )}
+                          <a
+                            href={`mailto:${member.email}`}
+                            className="text-muted-foreground group-hover/email:text-foreground font-medium transition-colors duration-500 truncate"
+                            title={member.email}
+                          >
+                            {member.email}
+                          </a>
                         </div>
 
-                        {/* Contact Info */}
-                        <div className="space-y-3 pt-3">
-                          <div className="flex items-center justify-center gap-3 text-sm group/email">
-                            <div className="flex items-center gap-3 bg-muted/50 rounded-xl p-3 group-hover/email:bg-primary/10 transition-all duration-500 w-full max-w-xs">
-                              <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover/email:bg-primary group-hover/email:text-primary-foreground transition-all duration-500">
-                                <Mail className="h-4 w-4" />
-                              </div>
-                              <a
-                                href={`mailto:${member.email}`}
-                                className="text-muted-foreground group-hover/email:text-foreground font-medium transition-colors duration-500 truncate flex-1 text-left"
-                                title={member.email}
-                              >
-                                {member.email}
-                              </a>
-                            </div>
+                        {/* Phone */}
+                        <div className="flex items-center gap-3 bg-muted/50 rounded-xl p-3 group/phone transition-all duration-500">
+                          <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover/phone:bg-primary group-hover/phone:text-primary-foreground transition-all duration-500">
+                            <Phone className="h-4 w-4" />
                           </div>
-
-                          <div className="flex items-center justify-center gap-3 text-sm group/phone">
-                            <div className="flex items-center gap-3 bg-muted/50 rounded-xl p-3 group-hover/phone:bg-primary/10 transition-all duration-500 w-full max-w-xs">
-                              <div className="p-2 rounded-lg bg-primary/10 text-primary group-hover/phone:bg-primary group-hover/phone:text-primary-foreground transition-all duration-500">
-                                <Phone className="h-4 w-4" />
-                              </div>
-                              <a
-                                href={`tel:${member.phone}`}
-                                className="text-muted-foreground group-hover/phone:text-foreground font-medium transition-colors duration-500"
-                              >
-                                {member.phone}
-                              </a>
-                            </div>
-                          </div>
+                          <a
+                            href={`tel:${member.phone}`}
+                            className="text-muted-foreground group-hover/phone:text-foreground font-medium transition-colors duration-500"
+                          >
+                            {member.phone}
+                          </a>
                         </div>
+
                       </div>
                     </div>
+
                   </div>
                 </GlassCard>
               ))}
