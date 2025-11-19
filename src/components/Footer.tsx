@@ -4,7 +4,7 @@ import { BookOpen, Mail, Phone, MapPin } from "lucide-react";
 const Footer = () => {
   // Contact information
   const contactInfo = {
-    phone: "+91-XXX-XXX-XXXX",
+    phone: "+917892468482",
     email: "sirmvgsclibrary@gmail.com",
     address: "Sir MV Government Science College"
   };
